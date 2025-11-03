@@ -1,8 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Calendar, MessageSquare, BarChart3, Target, Award } from "lucide-react";
+import { BookOpen, Calendar, MessageSquare, BarChart3, Target, LogOut, Settings } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import ScoreManagement from "@/components/ScoreManagement";
 import ScheduleTable from "@/components/ScheduleTable";
 import AIChat from "@/components/AIChat";
@@ -10,6 +13,17 @@ import Dashboard from "@/components/Dashboard";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: 'Đã đăng xuất',
+      description: 'Hẹn gặp lại bạn!',
+    });
+    navigate('/auth');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
@@ -27,6 +41,24 @@ const Index = () => {
                 </h1>
                 <p className="text-xs text-muted-foreground">Học thông minh, tiến xa hơn</p>
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/subject-selection')}
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Môn chuyên
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Đăng xuất
+              </Button>
             </div>
           </div>
         </div>
