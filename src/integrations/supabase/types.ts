@@ -38,6 +38,42 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_results: {
+        Row: {
+          completed_at: string
+          created_at: string
+          grade: string
+          id: string
+          questions_data: Json
+          score: number
+          subject: string
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          created_at?: string
+          grade: string
+          id?: string
+          questions_data: Json
+          score: number
+          subject: string
+          total_questions: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string
+          grade?: string
+          id?: string
+          questions_data?: Json
+          score?: number
+          subject?: string
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       specialized_subjects: {
         Row: {
           created_at: string

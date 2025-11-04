@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BookOpen, Calendar, MessageSquare, BarChart3, Target, LogOut, Settings } from "lucide-react";
+import { BookOpen, Calendar, MessageSquare, BarChart3, Target, LogOut, Settings, Brain } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import ScoreManagement from "@/components/ScoreManagement";
 import ScheduleTable from "@/components/ScheduleTable";
 import AIChat from "@/components/AIChat";
 import Dashboard from "@/components/Dashboard";
+import QuizTest from "@/components/QuizTest";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -67,7 +68,7 @@ const Index = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-5 lg:w-auto lg:inline-grid">
             <TabsTrigger value="dashboard" className="gap-2">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">Dashboard</span>
@@ -76,13 +77,17 @@ const Index = () => {
               <Target className="w-4 h-4" />
               <span className="hidden sm:inline">Điểm số</span>
             </TabsTrigger>
+            <TabsTrigger value="quiz" className="gap-2">
+              <Brain className="w-4 h-4" />
+              <span className="hidden sm:inline">Kiểm tra</span>
+            </TabsTrigger>
             <TabsTrigger value="schedule" className="gap-2">
               <Calendar className="w-4 h-4" />
-              <span className="hidden sm:inline">Thời khóa biểu</span>
+              <span className="hidden sm:inline">Lịch học</span>
             </TabsTrigger>
             <TabsTrigger value="ai-tutor" className="gap-2">
               <MessageSquare className="w-4 h-4" />
-              <span className="hidden sm:inline">AI Trợ giúp</span>
+              <span className="hidden sm:inline">AI Chat</span>
             </TabsTrigger>
           </TabsList>
 
@@ -92,6 +97,10 @@ const Index = () => {
 
           <TabsContent value="scores" className="space-y-6">
             <ScoreManagement />
+          </TabsContent>
+
+          <TabsContent value="quiz" className="space-y-6">
+            <QuizTest />
           </TabsContent>
 
           <TabsContent value="schedule" className="space-y-6">
