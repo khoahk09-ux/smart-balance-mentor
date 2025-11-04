@@ -113,6 +113,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_scores: {
+        Row: {
+          created_at: string
+          grade: string
+          id: string
+          is_completed: boolean
+          scores: Json
+          semester: string
+          subject: string
+          target_score: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          grade: string
+          id?: string
+          is_completed?: boolean
+          scores?: Json
+          semester: string
+          subject: string
+          target_score?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          grade?: string
+          id?: string
+          is_completed?: boolean
+          scores?: Json
+          semester?: string
+          subject?: string
+          target_score?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
