@@ -74,6 +74,33 @@ export type Database = {
         }
         Relationships: []
       }
+      schedules: {
+        Row: {
+          created_at: string
+          id: string
+          schedule_data: Json
+          schedule_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          schedule_data?: Json
+          schedule_type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          schedule_data?: Json
+          schedule_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       specialized_subjects: {
         Row: {
           created_at: string
