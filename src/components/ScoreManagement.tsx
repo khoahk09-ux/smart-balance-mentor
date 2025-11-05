@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Target, CheckCircle2, TrendingUp, AlertCircle, Lightbulb, Save } from "lucide-react";
+import { Target, CheckCircle2, TrendingUp, AlertCircle, Lightbulb, Save, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import ScoreChart from "./ScoreChart";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const SUBJECTS = [
   "Toán", "Lý", "Hóa", "Sinh", "Văn", "Anh", 
@@ -221,6 +222,24 @@ const ScoreManagement = () => {
     }
   };
 
+  // Enable editing after completion
+  const handleEdit = async () => {
+    if (!user || !currentRecord) return;
+
+    const { error } = await supabase
+      .from("user_scores")
+      .update({ is_completed: false })
+      .eq("id", currentRecord.id);
+
+    if (error) {
+      console.error("Error enabling edit:", error);
+      toast.error("Lỗi khi chỉnh sửa!");
+    } else {
+      toast.success("Đã bật chế độ chỉnh sửa!");
+      loadScores();
+    }
+  };
+
   // Calculate average
   const calculateAverage = (scores: ScoreData) => {
     const tx = [scores.tx1, scores.tx2, scores.tx3, scores.tx4, scores.tx5]
@@ -362,12 +381,34 @@ const ScoreManagement = () => {
             {/* Status Badge */}
             {currentRecord?.is_completed && (
               <Card className="p-4 bg-success/10 border-success/20">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-6 h-6 text-success" />
-                  <div>
-                    <p className="font-semibold text-success">Đã hoàn thành nhập điểm</p>
-                    <p className="text-sm text-muted-foreground">Điểm trung bình: {currentAverage.toFixed(2)}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 className="w-6 h-6 text-success" />
+                    <div>
+                      <p className="font-semibold text-success">Đã hoàn thành nhập điểm</p>
+                      <p className="text-sm text-muted-foreground">Điểm trung bình: {currentAverage.toFixed(2)}</p>
+                    </div>
                   </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <Edit className="w-4 h-4" />
+                        Chỉnh sửa
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Xác nhận chỉnh sửa</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Bạn có chắc chắn muốn sửa đổi số điểm đã nhập!
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Hủy</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleEdit}>Xác nhận</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </Card>
             )}
