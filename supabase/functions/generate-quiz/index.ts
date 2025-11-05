@@ -20,25 +20,44 @@ serve(async (req) => {
 
     const systemPrompt = `Bạn là một giáo viên chuyên nghiệp tạo bài kiểm tra cho học sinh Việt Nam.
     
-Hãy tạo ${numQuestions} câu hỏi trắc nghiệm cho môn ${subject}, khối ${grade}${topic ? `, chủ đề: ${topic}` : ''}.
+Hãy tạo ${numQuestions} câu hỏi cho môn ${subject}, khối ${grade}${topic ? `, chủ đề: ${topic}` : ''}.
 
-QUAN TRỌNG: Bạn PHẢI trả về kết quả theo ĐÚNG định dạng JSON sau, không thêm bất kỳ text nào khác:
+QUAN TRỌNG: Bài kiểm tra phải bao gồm cả 3 dạng câu hỏi:
+1. Trắc nghiệm (Multiple Choice) - khoảng 60% số câu
+2. Đúng/Sai (True/False) - khoảng 20% số câu  
+3. Trả lời ngắn (Short Answer) - khoảng 20% số câu
+
+Bạn PHẢI trả về kết quả theo ĐÚNG định dạng JSON sau:
 
 {
   "questions": [
     {
-      "question": "Câu hỏi ở đây",
+      "type": "multiple_choice",
+      "question": "Câu hỏi trắc nghiệm",
       "options": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
       "correctAnswer": 0,
-      "explanation": "Giải thích tại sao đáp án này đúng"
+      "explanation": "Giải thích"
+    },
+    {
+      "type": "true_false",
+      "question": "Câu hỏi đúng/sai",
+      "correctAnswer": "true",
+      "explanation": "Giải thích"
+    },
+    {
+      "type": "short_answer",
+      "question": "Câu hỏi trả lời ngắn",
+      "correctAnswer": "Đáp án đúng",
+      "explanation": "Giải thích"
     }
   ]
 }
 
 Yêu cầu:
 - Câu hỏi phải phù hợp với chương trình học khối ${grade}
-- 4 đáp án cho mỗi câu, trong đó chỉ 1 đáp án đúng
-- correctAnswer là chỉ số (0-3) của đáp án đúng trong mảng options
+- Trắc nghiệm: 4 đáp án, correctAnswer là chỉ số (0-3)
+- Đúng/Sai: correctAnswer là "true" hoặc "false"
+- Trả lời ngắn: correctAnswer là chuỗi văn bản ngắn gọn
 - Giải thích ngắn gọn, dễ hiểu cho học sinh
 - Độ khó phù hợp với trình độ
 
@@ -61,7 +80,7 @@ CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT HAY MARKDOWN.`;
             type: "function",
             function: {
               name: "create_quiz",
-              description: "Tạo bài kiểm tra trắc nghiệm",
+              description: "Tạo bài kiểm tra gồm 3 dạng: trắc nghiệm, đúng/sai, và trả lời ngắn",
               parameters: {
                 type: "object",
                 properties: {
@@ -70,22 +89,24 @@ CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT HAY MARKDOWN.`;
                     items: {
                       type: "object",
                       properties: {
+                        type: { 
+                          type: "string",
+                          enum: ["multiple_choice", "true_false", "short_answer"]
+                        },
                         question: { type: "string" },
                         options: { 
                           type: "array",
-                          items: { type: "string" },
-                          minItems: 4,
-                          maxItems: 4
+                          items: { type: "string" }
                         },
                         correctAnswer: { 
-                          type: "integer",
-                          minimum: 0,
-                          maximum: 3
+                          anyOf: [
+                            { type: "integer" },
+                            { type: "string" }
+                          ]
                         },
                         explanation: { type: "string" }
                       },
-                      required: ["question", "options", "correctAnswer", "explanation"],
-                      additionalProperties: false
+                      required: ["type", "question", "correctAnswer", "explanation"]
                     }
                   }
                 },

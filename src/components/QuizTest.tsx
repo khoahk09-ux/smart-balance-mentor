@@ -20,9 +20,10 @@ const SUBJECTS = [
 const GRADES = ["10", "11", "12"];
 
 interface Question {
+  type: "multiple_choice" | "true_false" | "short_answer";
   question: string;
-  options: string[];
-  correctAnswer: number;
+  options?: string[];
+  correctAnswer: number | string;
   explanation: string;
 }
 
@@ -48,7 +49,8 @@ const QuizTest = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
+  const [selectedAnswers, setSelectedAnswers] = useState<(number | string)[]>([]);
+  const [shortAnswers, setShortAnswers] = useState<string[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<QuizResult[]>([]);
@@ -99,6 +101,7 @@ const QuizTest = () => {
       setQuiz(data);
       setCurrentQuestion(0);
       setSelectedAnswers([]);
+      setShortAnswers([]);
       setShowResults(false);
       toast.success("Đã tạo bài kiểm tra!");
     } catch (error) {
@@ -109,10 +112,17 @@ const QuizTest = () => {
     }
   };
 
-  const handleAnswerSelect = (answerIndex: number) => {
+  const handleAnswerSelect = (answer: number | string) => {
     const newAnswers = [...selectedAnswers];
-    newAnswers[currentQuestion] = answerIndex;
+    newAnswers[currentQuestion] = answer;
     setSelectedAnswers(newAnswers);
+  };
+
+  const handleShortAnswerChange = (text: string) => {
+    const newAnswers = [...shortAnswers];
+    newAnswers[currentQuestion] = text;
+    setShortAnswers(newAnswers);
+    handleAnswerSelect(text);
   };
 
   const handleNext = () => {
@@ -130,16 +140,24 @@ const QuizTest = () => {
   const handleSubmit = async () => {
     if (!quiz || !user) return;
 
-    const score = selectedAnswers.reduce((acc, answer, idx) => {
-      return acc + (answer === quiz.questions[idx].correctAnswer ? 1 : 0);
-    }, 0);
+    let score = 0;
+    selectedAnswers.forEach((answer, idx) => {
+      const q = quiz.questions[idx];
+      if (q.type === "short_answer") {
+        const userAnswer = (answer as string || "").trim().toLowerCase();
+        const correctAnswer = (q.correctAnswer as string || "").trim().toLowerCase();
+        if (userAnswer === correctAnswer) score++;
+      } else if (answer === q.correctAnswer) {
+        score++;
+      }
+    });
 
     // Save result to database
     const insertData: Database['public']['Tables']['quiz_results']['Insert'] = {
       user_id: user.id,
       subject,
       grade,
-      score,
+      score: score,
       total_questions: quiz.questions.length,
       questions_data: quiz as any
     };
@@ -160,14 +178,24 @@ const QuizTest = () => {
     setQuiz(null);
     setCurrentQuestion(0);
     setSelectedAnswers([]);
+    setShortAnswers([]);
     setShowResults(false);
   };
 
-  const calculateScore = () => {
+  const calculateScore = (): number => {
     if (!quiz) return 0;
-    return selectedAnswers.reduce((acc, answer, idx) => {
-      return acc + (answer === quiz.questions[idx].correctAnswer ? 1 : 0);
-    }, 0);
+    let score = 0;
+    selectedAnswers.forEach((answer, idx) => {
+      const q = quiz.questions[idx];
+      if (q.type === "short_answer") {
+        const userAnswer = (answer as string || "").trim().toLowerCase();
+        const correctAnswer = (q.correctAnswer as string || "").trim().toLowerCase();
+        if (userAnswer === correctAnswer) score++;
+      } else if (answer === q.correctAnswer) {
+        score++;
+      }
+    });
+    return score;
   };
 
   const currentQ = quiz?.questions[currentQuestion];
@@ -337,7 +365,7 @@ const QuizTest = () => {
 
   if (showResults) {
     const score = calculateScore();
-    const percentage = (score / quiz.questions.length) * 100;
+    const percentage = quiz.questions.length > 0 ? (score / quiz.questions.length) * 100 : 0;
 
     return (
       <div className="space-y-6 animate-in fade-in duration-500">
@@ -363,7 +391,15 @@ const QuizTest = () => {
         <div className="space-y-4">
           {quiz.questions.map((q, idx) => {
             const userAnswer = selectedAnswers[idx];
-            const isCorrect = userAnswer === q.correctAnswer;
+            let isCorrect = false;
+            
+            if (q.type === "short_answer") {
+              const userAns = (userAnswer as string || "").trim().toLowerCase();
+              const correctAns = (q.correctAnswer as string || "").trim().toLowerCase();
+              isCorrect = userAns === correctAns;
+            } else {
+              isCorrect = userAnswer === q.correctAnswer;
+            }
 
             return (
               <Card key={idx} className={`p-4 ${isCorrect ? 'border-success' : 'border-destructive'}`}>
@@ -374,22 +410,69 @@ const QuizTest = () => {
                     <XCircle className="w-5 h-5 text-destructive mt-1" />
                   )}
                   <div className="flex-1">
-                    <p className="font-semibold mb-2">Câu {idx + 1}: {q.question}</p>
-                    <div className="space-y-2">
-                      {q.options.map((option, optIdx) => (
-                        <div 
-                          key={optIdx}
-                          className={`p-2 rounded-lg ${
-                            optIdx === q.correctAnswer ? 'bg-success/20 border border-success' :
-                            optIdx === userAnswer ? 'bg-destructive/20 border border-destructive' :
-                            'bg-muted/30'
-                          }`}
-                        >
-                          {option}
-                          {optIdx === q.correctAnswer && " ✓"}
-                        </div>
-                      ))}
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline" className="text-xs">
+                        {q.type === "multiple_choice" && "Trắc nghiệm"}
+                        {q.type === "true_false" && "Đúng/Sai"}
+                        {q.type === "short_answer" && "Trả lời ngắn"}
+                      </Badge>
                     </div>
+                    <p className="font-semibold mb-2">Câu {idx + 1}: {q.question}</p>
+                    
+                    {q.type === "multiple_choice" && q.options && (
+                      <div className="space-y-2">
+                        {q.options.map((option, optIdx) => (
+                          <div 
+                            key={optIdx}
+                            className={`p-2 rounded-lg ${
+                              optIdx === q.correctAnswer ? 'bg-success/20 border border-success' :
+                              optIdx === userAnswer ? 'bg-destructive/20 border border-destructive' :
+                              'bg-muted/30'
+                            }`}
+                          >
+                            {option}
+                            {optIdx === q.correctAnswer && " ✓"}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {q.type === "true_false" && (
+                      <div className="space-y-2">
+                        <div className={`p-2 rounded-lg ${
+                          q.correctAnswer === "true" ? 'bg-success/20 border border-success' :
+                          userAnswer === "true" ? 'bg-destructive/20 border border-destructive' :
+                          'bg-muted/30'
+                        }`}>
+                          ✓ Đúng {q.correctAnswer === "true" && " ✓"}
+                        </div>
+                        <div className={`p-2 rounded-lg ${
+                          q.correctAnswer === "false" ? 'bg-success/20 border border-success' :
+                          userAnswer === "false" ? 'bg-destructive/20 border border-destructive' :
+                          'bg-muted/30'
+                        }`}>
+                          ✗ Sai {q.correctAnswer === "false" && " ✓"}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {q.type === "short_answer" && (
+                      <div className="space-y-2">
+                        <div className="p-2 rounded-lg bg-muted/30">
+                          <span className="text-sm font-medium">Câu trả lời của bạn: </span>
+                          <span className={isCorrect ? "text-success" : "text-destructive"}>
+                            {userAnswer as string || "(Không trả lời)"}
+                          </span>
+                        </div>
+                        {!isCorrect && (
+                          <div className="p-2 rounded-lg bg-success/20 border border-success">
+                            <span className="text-sm font-medium">Đáp án đúng: </span>
+                            {q.correctAnswer as string}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    
                     <div className="mt-3 p-3 rounded-lg bg-accent/10 border border-accent/20">
                       <p className="text-sm font-medium mb-1">Giải thích:</p>
                       <p className="text-sm text-muted-foreground">{q.explanation}</p>
@@ -433,10 +516,18 @@ const QuizTest = () => {
         <Progress value={((currentQuestion + 1) / quiz.questions.length) * 100} className="mb-6" />
 
         <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Badge variant="outline">
+              {currentQ?.type === "multiple_choice" && "Trắc nghiệm"}
+              {currentQ?.type === "true_false" && "Đúng/Sai"}
+              {currentQ?.type === "short_answer" && "Trả lời ngắn"}
+            </Badge>
+          </div>
+          
           <p className="text-lg font-medium">{currentQ?.question}</p>
           
           <div className="space-y-2">
-            {currentQ?.options.map((option, idx) => (
+            {currentQ?.type === "multiple_choice" && currentQ.options?.map((option, idx) => (
               <button
                 key={idx}
                 onClick={() => handleAnswerSelect(idx)}
@@ -450,6 +541,40 @@ const QuizTest = () => {
                 {option}
               </button>
             ))}
+            
+            {currentQ?.type === "true_false" && (
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => handleAnswerSelect("true")}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    selectedAnswers[currentQuestion] === "true"
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <span className="font-medium">✓ Đúng</span>
+                </button>
+                <button
+                  onClick={() => handleAnswerSelect("false")}
+                  className={`p-4 rounded-lg border-2 transition-all ${
+                    selectedAnswers[currentQuestion] === "false"
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  <span className="font-medium">✗ Sai</span>
+                </button>
+              </div>
+            )}
+            
+            {currentQ?.type === "short_answer" && (
+              <Input
+                value={shortAnswers[currentQuestion] || ""}
+                onChange={(e) => handleShortAnswerChange(e.target.value)}
+                placeholder="Nhập câu trả lời của bạn..."
+                className="text-base p-4"
+              />
+            )}
           </div>
         </div>
 
