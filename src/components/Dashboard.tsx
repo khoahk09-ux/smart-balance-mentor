@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, ListTodo, Trophy, TrendingUp, Check, Smile, Frown, Angry, Calendar, AlertCircle, Flame, RotateCcw } from "lucide-react";
+import { CheckCircle2, ListTodo, Trophy, TrendingUp, Check, Smile, Frown, Angry, Calendar, AlertCircle, Flame, RotateCcw, Meh } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
@@ -229,17 +229,17 @@ const Dashboard = () => {
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'bạn';
 
-  // Get mood based on score and access frequency
+  // Get mood based on average score only
   const getMoodData = () => {
-    if (averageScore >= 8 && accessFrequency >= 5) {
+    if (averageScore >= 8) {
       return {
         icon: Smile,
         message: "Bạn đang làm rất tốt cố lên!!",
         color: "text-success"
       };
-    } else if (averageScore >= 5 && averageScore < 8) {
+    } else if (averageScore >= 5) {
       return {
-        icon: Frown,
+        icon: Meh,
         message: "Bạn cần cố gắng hơn nhé, cố lên nào",
         color: "text-warning"
       };
@@ -329,8 +329,8 @@ const Dashboard = () => {
         </div>
       </Card>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Stats Cards and Progress */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="p-6 hover:shadow-lg transition-shadow">
           <div className="flex items-start justify-between mb-4">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -383,112 +383,27 @@ const Dashboard = () => {
           <p className="text-sm text-muted-foreground mb-1">Thành tích đạt được</p>
           <p className="text-3xl font-bold">{achievementsCount}</p>
         </Card>
-      </div>
-
-      {/* Activity and Progress */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Score Analysis Chart */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Biểu đồ phân tích điểm</h3>
-            <div className="flex items-center gap-2">
-              <Select value={selectedGrade} onValueChange={setSelectedGrade}>
-                <SelectTrigger className="w-24">
-                  <SelectValue placeholder="Khối" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">Khối 10</SelectItem>
-                  <SelectItem value="11">Khối 11</SelectItem>
-                  <SelectItem value="12">Khối 12</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={selectedSemester} onValueChange={setSelectedSemester}>
-                <SelectTrigger className="w-24">
-                  <SelectValue placeholder="Kỳ" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1">Kỳ 1</SelectItem>
-                  <SelectItem value="2">Kỳ 2</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="h-64">
-            {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis 
-                    dataKey="subject" 
-                    tick={{ fill: 'hsl(var(--foreground))' }}
-                    axisLine={{ stroke: 'hsl(var(--border))' }}
-                  />
-                  <YAxis 
-                    domain={[0, 10]} 
-                    ticks={[0, 2, 4, 6, 8, 10]}
-                    tick={{ fill: 'hsl(var(--foreground))' }}
-                    axisLine={{ stroke: 'hsl(var(--border))' }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px'
-                    }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="score" 
-                    stroke="#ff6b35" 
-                    strokeWidth={3}
-                    dot={{ fill: '#ff6b35', r: 6, strokeWidth: 2, stroke: '#fff' }}
-                    activeDot={{ r: 8 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex items-center justify-center text-muted-foreground">
-                Chưa có dữ liệu điểm
-              </div>
-            )}
-          </div>
-        </Card>
 
         {/* My Progress with Mood */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold">Tiến độ của tôi</h3>
-          </div>
-
-          <div className="flex flex-col items-center justify-center mb-6">
-            <div className={`w-32 h-32 rounded-full flex items-center justify-center mb-4 ${
+        <Card className="p-6 hover:shadow-lg transition-shadow">
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-3 ${
               moodData.color === "text-success" ? "bg-success/10" :
               moodData.color === "text-warning" ? "bg-warning/10" : "bg-destructive/10"
             }`}>
-              <MoodIcon className={`w-20 h-20 ${moodData.color}`} />
+              <MoodIcon className={`w-12 h-12 ${moodData.color}`} />
             </div>
-            <p className={`text-center font-semibold text-lg ${moodData.color}`}>
+            <p className="text-sm text-muted-foreground mb-1">Điểm trung bình</p>
+            <p className="text-3xl font-bold mb-2">{averageScore > 0 ? averageScore.toFixed(1) : '--'}</p>
+            <p className={`text-center font-medium text-sm ${moodData.color}`}>
               {moodData.message}
             </p>
           </div>
-
-          <div className="space-y-4 mt-8">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-              <span className="text-sm font-medium">Điểm trung bình</span>
-              <span className="text-lg font-bold">{averageScore.toFixed(1)}</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-              <span className="text-sm font-medium">Truy cập (7 ngày)</span>
-              <span className="text-lg font-bold">{accessFrequency} lần</span>
-            </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
-              <span className="text-sm font-medium">Chuỗi liên tục</span>
-              <span className="text-lg font-bold">{streak} ngày</span>
-            </div>
-          </div>
         </Card>
       </div>
+
+      {/* Activities Section */}
+      <div className="grid grid-cols-1 gap-6">
 
       {/* Subjects Need More Study */}
       <Card className="p-6">
@@ -531,6 +446,7 @@ const Dashboard = () => {
           )}
         </div>
       </Card>
+      </div>
     </div>
   );
 };
