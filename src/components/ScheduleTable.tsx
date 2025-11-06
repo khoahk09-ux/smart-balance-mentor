@@ -22,7 +22,6 @@ const ALL_PERIODS = [...MORNING_PERIODS, ...AFTERNOON_PERIODS];
 
 interface ExtraClass {
   day: string;
-  period: string;
   time: string;
   subject: string;
 }
@@ -109,7 +108,7 @@ const ScheduleTable = () => {
   };
 
   const addExtraClass = () => {
-    setExtraSchedule([...extraSchedule, { day: DAYS[0], period: ALL_PERIODS[0], time: TIME_SLOTS[0], subject: "" }]);
+    setExtraSchedule([...extraSchedule, { day: DAYS[0], time: TIME_SLOTS[0], subject: "" }]);
   };
 
   const updateExtraClass = (index: number, field: keyof ExtraClass, value: string) => {
@@ -146,7 +145,7 @@ const ScheduleTable = () => {
         // Thời gian học
         schedule[day].push({
           time: extraClass.time,
-          activity: `📚 Học ${extraClass.subject} (${extraClass.period})`,
+          activity: `📚 Học ${extraClass.subject}`,
           type: "study"
         });
         
@@ -325,168 +324,59 @@ const ScheduleTable = () => {
               </div>
             </Card>
 
-            <div className="overflow-x-auto">
-              <div className="min-w-[600px]">
-                <div className="space-y-6">
-                  {/* Buổi sáng */}
-                  <div>
-                    <h3 className="font-semibold text-lg mb-3 text-purple-600 dark:text-purple-400">
-                      ☀️ Buổi sáng - Học thêm
-                    </h3>
-                    <div className="grid grid-cols-8 gap-2">
-                      <div className="font-semibold text-center p-3 bg-primary/10 rounded-lg text-sm">
-                        Tiết
-                      </div>
-                      {DAYS.map(day => (
-                        <div key={day} className="font-semibold text-center p-3 bg-primary/10 rounded-lg text-sm">
-                          {day}
-                        </div>
-                      ))}
+            <div className="space-y-3">
+              {extraSchedule.map((extraClass, index) => (
+                <Card key={index} className="p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <Select
+                      value={extraClass.day}
+                      onValueChange={(value) => updateExtraClass(index, "day", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn thứ" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DAYS.map(day => (
+                          <SelectItem key={day} value={day}>{day}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-                      {MORNING_PERIODS.map(period => (
-                        <>
-                          <div key={`extra-morning-${period}`} className="text-sm font-medium p-3 bg-muted/30 rounded-lg flex items-center justify-center">
-                            {period}
-                          </div>
-                          {DAYS.map(day => {
-                            const existingClass = extraSchedule.find(
-                              ec => ec.day === day && ec.period === period
-                            );
-                            const index = extraSchedule.findIndex(
-                              ec => ec.day === day && ec.period === period
-                            );
+                    <Select
+                      value={extraClass.time}
+                      onValueChange={(value) => updateExtraClass(index, "time", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn giờ" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TIME_SLOTS.map(time => (
+                          <SelectItem key={time} value={time}>{time}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-                            return (
-                              <div key={`${day}-${period}`} className="p-1">
-                                <div className="space-y-1">
-                                  <Input
-                                    value={existingClass?.subject || ""}
-                                    onChange={(e) => {
-                                      if (index >= 0) {
-                                        updateExtraClass(index, "subject", e.target.value);
-                                      } else {
-                                        setExtraSchedule([
-                                          ...extraSchedule,
-                                          { day, period, time: "", subject: e.target.value }
-                                        ]);
-                                      }
-                                    }}
-                                    placeholder="Môn học..."
-                                    className="h-10 text-center text-sm"
-                                  />
-                                  <Select
-                                    value={existingClass?.time || ""}
-                                    onValueChange={(value) => {
-                                      if (index >= 0) {
-                                        updateExtraClass(index, "time", value);
-                                      } else {
-                                        setExtraSchedule([
-                                          ...extraSchedule,
-                                          { day, period, time: value, subject: "" }
-                                        ]);
-                                      }
-                                    }}
-                                  >
-                                    <SelectTrigger className="h-8 text-xs">
-                                      <SelectValue placeholder="Giờ học" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {TIME_SLOTS.map(time => (
-                                        <SelectItem key={time} value={time} className="text-xs">
-                                          {time}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </>
-                      ))}
-                    </div>
+                    <Input
+                      value={extraClass.subject}
+                      onChange={(e) => updateExtraClass(index, "subject", e.target.value)}
+                      placeholder="Tên môn học..."
+                      className="md:col-span-1"
+                    />
+
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => removeExtraClass(index)}
+                    >
+                      Xóa
+                    </Button>
                   </div>
+                </Card>
+              ))}
 
-                  {/* Buổi chiều */}
-                  <div>
-                    <h3 className="font-semibold text-lg mb-3 text-pink-600 dark:text-pink-400">
-                      🌤️ Buổi chiều - Học thêm
-                    </h3>
-                    <div className="grid grid-cols-8 gap-2">
-                      <div className="font-semibold text-center p-3 bg-primary/10 rounded-lg text-sm">
-                        Tiết
-                      </div>
-                      {DAYS.map(day => (
-                        <div key={day} className="font-semibold text-center p-3 bg-primary/10 rounded-lg text-sm">
-                          {day}
-                        </div>
-                      ))}
-
-                      {AFTERNOON_PERIODS.map(period => (
-                        <>
-                          <div key={`extra-afternoon-${period}`} className="text-sm font-medium p-3 bg-muted/30 rounded-lg flex items-center justify-center">
-                            {period}
-                          </div>
-                          {DAYS.map(day => {
-                            const existingClass = extraSchedule.find(
-                              ec => ec.day === day && ec.period === period
-                            );
-                            const index = extraSchedule.findIndex(
-                              ec => ec.day === day && ec.period === period
-                            );
-
-                            return (
-                              <div key={`${day}-${period}`} className="p-1">
-                                <div className="space-y-1">
-                                  <Input
-                                    value={existingClass?.subject || ""}
-                                    onChange={(e) => {
-                                      if (index >= 0) {
-                                        updateExtraClass(index, "subject", e.target.value);
-                                      } else {
-                                        setExtraSchedule([
-                                          ...extraSchedule,
-                                          { day, period, time: "", subject: e.target.value }
-                                        ]);
-                                      }
-                                    }}
-                                    placeholder="Môn học..."
-                                    className="h-10 text-center text-sm"
-                                  />
-                                  <Select
-                                    value={existingClass?.time || ""}
-                                    onValueChange={(value) => {
-                                      if (index >= 0) {
-                                        updateExtraClass(index, "time", value);
-                                      } else {
-                                        setExtraSchedule([
-                                          ...extraSchedule,
-                                          { day, period, time: value, subject: "" }
-                                        ]);
-                                      }
-                                    }}
-                                  >
-                                    <SelectTrigger className="h-8 text-xs">
-                                      <SelectValue placeholder="Giờ học" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {TIME_SLOTS.map(time => (
-                                        <SelectItem key={time} value={time} className="text-xs">
-                                          {time}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <Button onClick={addExtraClass} variant="outline" className="w-full">
+                + Thêm môn học thêm
+              </Button>
             </div>
 
             <div className="flex justify-end">
