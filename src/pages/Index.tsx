@@ -9,6 +9,7 @@ import ScheduleTable from "@/components/ScheduleTable";
 import AIChat from "@/components/AIChat";
 import Dashboard from "@/components/Dashboard";
 import QuizTest from "@/components/QuizTest";
+import Achievements from "@/components/Achievements";
 import Sidebar from "@/components/Sidebar";
 import RightPanel from "@/components/RightPanel";
 
@@ -36,6 +37,8 @@ const Index = () => {
         return <QuizTest />;
       case "schedule":
         return <ScheduleTable />;
+      case "achievements":
+        return <Achievements />;
       case "ai-tutor":
         return <AIChat />;
       case "profile":
@@ -84,6 +87,7 @@ const Index = () => {
                    activeTab === "scores" ? "Điểm số" :
                    activeTab === "quiz" ? "Kiểm tra" :
                    activeTab === "schedule" ? "Lịch học" :
+                   activeTab === "achievements" ? "Thành tích" :
                    activeTab === "ai-tutor" ? "AI Chat" :
                    "Cài đặt"}
                 </h1>

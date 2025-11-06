@@ -1,4 +1,4 @@
-import { BookOpen, BarChart3, Target, Calendar, MessageSquare, Settings, Brain, User } from "lucide-react";
+import { BookOpen, BarChart3, Target, Calendar, MessageSquare, Settings, Brain, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
@@ -12,6 +12,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
     { id: "scores", label: "Điểm số", icon: Target },
     { id: "quiz", label: "Kiểm tra", icon: Brain },
     { id: "schedule", label: "Lịch học", icon: Calendar },
+    { id: "achievements", label: "Thành tích", icon: Trophy },
     { id: "ai-tutor", label: "AI Chat", icon: MessageSquare },
     { id: "profile", label: "Cài đặt", icon: Settings },
   ];
