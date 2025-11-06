@@ -127,13 +127,13 @@ const Dashboard = () => {
           : 0;
         setAverageScore(avg);
 
-        // Find low score subjects (< 5)
+        // Find low score subjects (< 6.5)
         const lowSubjects = scoresData.filter(s => {
           const scoreValues = Object.values(s.scores || {}).filter((v): v is number => typeof v === 'number');
           const subjectAvg = scoreValues.length > 0 
             ? scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length 
             : 0;
-          return subjectAvg < 5;
+          return subjectAvg < 6.5;
         });
         setLowScoreSubjects(lowSubjects);
       }
@@ -425,15 +425,15 @@ const Dashboard = () => {
                     <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
                       <AlertCircle className="w-5 h-5 text-destructive" />
                     </div>
-                    <div>
-                      <h4 className="font-semibold">{subject.subject}</h4>
-                      <p className="text-sm text-muted-foreground">Điểm trung bình: {avg.toFixed(1)}</p>
-                    </div>
+                  <div>
+                    <h4 className="font-semibold">{subject.subject}</h4>
+                    <p className="text-sm text-muted-foreground">Điểm trung bình: {avg.toFixed(1)}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-destructive">Cần cải thiện</p>
-                    <p className="text-xs text-muted-foreground">Khối {subject.grade} - Kỳ {subject.semester}</p>
-                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-destructive">Bạn cần ôn tập thêm môn này để cải thiện kết quả</p>
+                  <p className="text-xs text-muted-foreground">Khối {subject.grade} - Kỳ {subject.semester}</p>
+                </div>
                 </div>
               );
             })
