@@ -108,22 +108,32 @@ const ScheduleTable = () => {
     });
   };
 
-  const handleExtraClassChange = (day: string, session: string, field: 'subject' | 'time', value: string) => {
-    const existingIndex = extraSchedule.findIndex(ec => ec.day === day && ec.session === session);
-    
-    if (existingIndex >= 0) {
+  const handleExtraClassChange = (day: string, session: string, index: number, field: 'subject' | 'time', value: string) => {
+    const classesInSlot = extraSchedule.filter(ec => ec.day === day && ec.session === session);
+    if (index < classesInSlot.length) {
+      const targetClass = classesInSlot[index];
+      const globalIndex = extraSchedule.findIndex(ec => ec === targetClass);
       const updated = [...extraSchedule];
-      updated[existingIndex] = { ...updated[existingIndex], [field]: value };
+      updated[globalIndex] = { ...updated[globalIndex], [field]: value };
       setExtraSchedule(updated);
-    } else {
-      // Tạo mới nếu chưa tồn tại
-      const newClass: ExtraClass = {
-        day,
-        session,
-        time: field === 'time' ? value : '',
-        subject: field === 'subject' ? value : ''
-      };
-      setExtraSchedule([...extraSchedule, newClass]);
+    }
+  };
+
+  const addExtraClassToSlot = (day: string, session: string) => {
+    const newClass: ExtraClass = {
+      day,
+      session,
+      time: '',
+      subject: ''
+    };
+    setExtraSchedule([...extraSchedule, newClass]);
+  };
+
+  const removeExtraClassFromSlot = (day: string, session: string, index: number) => {
+    const classesInSlot = extraSchedule.filter(ec => ec.day === day && ec.session === session);
+    if (index < classesInSlot.length) {
+      const targetClass = classesInSlot[index];
+      setExtraSchedule(extraSchedule.filter(ec => ec !== targetClass));
     }
   };
 
@@ -358,34 +368,54 @@ const ScheduleTable = () => {
                         {session}
                       </div>
                       {DAYS.map(day => {
-                        const existingClass = extraSchedule.find(
+                        const classesInSlot = extraSchedule.filter(
                           ec => ec.day === day && ec.session === session
                         );
                         
                         return (
                           <div key={`${day}-${session}`} className="p-1">
-                            <div className="space-y-1">
-                              <Input
-                                value={existingClass?.subject || ""}
-                                onChange={(e) => handleExtraClassChange(day, session, 'subject', e.target.value)}
-                                placeholder="Môn học..."
-                                className="h-10 text-center text-sm"
-                              />
-                              <Select
-                                value={existingClass?.time || ""}
-                                onValueChange={(value) => handleExtraClassChange(day, session, 'time', value)}
+                            <div className="space-y-2 min-h-[80px]">
+                              {classesInSlot.map((existingClass, idx) => (
+                                <div key={idx} className="space-y-1 p-2 bg-muted/20 rounded-lg relative group">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="absolute -top-1 -right-1 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={() => removeExtraClassFromSlot(day, session, idx)}
+                                  >
+                                    ×
+                                  </Button>
+                                  <Input
+                                    value={existingClass.subject}
+                                    onChange={(e) => handleExtraClassChange(day, session, idx, 'subject', e.target.value)}
+                                    placeholder="Môn học..."
+                                    className="h-8 text-center text-xs"
+                                  />
+                                  <Select
+                                    value={existingClass.time}
+                                    onValueChange={(value) => handleExtraClassChange(day, session, idx, 'time', value)}
+                                  >
+                                    <SelectTrigger className="h-7 text-xs">
+                                      <SelectValue placeholder="Giờ" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {TIME_SLOTS.map(time => (
+                                        <SelectItem key={time} value={time} className="text-xs">
+                                          {time}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              ))}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full h-7 text-xs"
+                                onClick={() => addExtraClassToSlot(day, session)}
                               >
-                                <SelectTrigger className="h-8 text-xs">
-                                  <SelectValue placeholder="Giờ" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {TIME_SLOTS.map(time => (
-                                    <SelectItem key={time} value={time} className="text-xs">
-                                      {time}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                                + Thêm môn
+                              </Button>
                             </div>
                           </div>
                         );
