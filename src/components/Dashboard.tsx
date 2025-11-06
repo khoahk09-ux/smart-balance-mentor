@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import {
   Select,
   SelectContent,
@@ -255,12 +255,27 @@ const Dashboard = () => {
   const moodData = getMoodData();
   const MoodIcon = moodData.icon;
 
-  // Prepare chart data
+  // Prepare chart data - calculate average with proper weights
   const chartData = scores.map(s => {
-    const scoreValues = Object.values(s.scores || {}).filter((v): v is number => typeof v === 'number');
-    const avg = scoreValues.length > 0 
-      ? scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length 
-      : 0;
+    const scoresObj = s.scores || {};
+    // Calculate average: (TX1 + TX2 + TX3 + TX4 + TX5 + GK*2 + CK*3) / 10
+    const tx1 = scoresObj.tx1 || 0;
+    const tx2 = scoresObj.tx2 || 0;
+    const tx3 = scoresObj.tx3 || 0;
+    const tx4 = scoresObj.tx4 || 0;
+    const tx5 = scoresObj.tx5 || 0;
+    const gk = scoresObj.gk || 0;
+    const ck = scoresObj.ck || 0;
+    
+    // Check if we have any scores
+    const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
+    
+    let avg = 0;
+    if (hasScores) {
+      const total = tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3);
+      avg = total / 10;
+    }
+    
     return {
       subject: s.subject,
       score: parseFloat(avg.toFixed(1))
@@ -402,13 +417,35 @@ const Dashboard = () => {
           <div className="h-64">
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="subject" />
-                  <YAxis domain={[0, 10]} />
-                  <Tooltip />
-                  <Bar dataKey="score" fill="hsl(var(--primary))" />
-                </BarChart>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis 
+                    dataKey="subject" 
+                    tick={{ fill: 'hsl(var(--foreground))' }}
+                    axisLine={{ stroke: 'hsl(var(--border))' }}
+                  />
+                  <YAxis 
+                    domain={[0, 10]} 
+                    ticks={[0, 2, 4, 6, 8, 10]}
+                    tick={{ fill: 'hsl(var(--foreground))' }}
+                    axisLine={{ stroke: 'hsl(var(--border))' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="score" 
+                    stroke="#ff6b35" 
+                    strokeWidth={3}
+                    dot={{ fill: '#ff6b35', r: 6, strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 8 }}
+                  />
+                </LineChart>
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex items-center justify-center text-muted-foreground">
