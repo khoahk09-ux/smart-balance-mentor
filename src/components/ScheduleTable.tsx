@@ -391,21 +391,12 @@ const ScheduleTable = () => {
                                     placeholder="Môn học..."
                                     className="h-8 text-center text-xs"
                                   />
-                                  <Select
+                                  <Input
                                     value={existingClass.time}
-                                    onValueChange={(value) => handleExtraClassChange(day, session, idx, 'time', value)}
-                                  >
-                                    <SelectTrigger className="h-7 text-xs">
-                                      <SelectValue placeholder="Giờ" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {TIME_SLOTS.map(time => (
-                                        <SelectItem key={time} value={time} className="text-xs">
-                                          {time}
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
+                                    onChange={(e) => handleExtraClassChange(day, session, idx, 'time', e.target.value)}
+                                    placeholder="VD: 18:00 - 20:00"
+                                    className="h-8 text-center text-xs"
+                                  />
                                 </div>
                               ))}
                               <Button
