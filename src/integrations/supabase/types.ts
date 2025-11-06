@@ -215,6 +215,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_check_in: string | null
+          last_recovery_reset: string | null
+          longest_streak: number
+          recovery_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_check_in?: string | null
+          last_recovery_reset?: string | null
+          longest_streak?: number
+          recovery_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_check_in?: string | null
+          last_recovery_reset?: string | null
+          longest_streak?: number
+          recovery_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

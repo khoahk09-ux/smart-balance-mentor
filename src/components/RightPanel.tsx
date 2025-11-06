@@ -1,33 +1,77 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, ChevronLeft, ChevronRight, Clock, Plus } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Calendar, ChevronLeft, ChevronRight, Clock, Plus, BookOpen } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const RightPanel = () => {
+  const { user } = useAuth();
+  const [scheduleData, setScheduleData] = useState<any[]>([]);
   const currentDate = new Date();
   const monthName = currentDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' });
-  
-  // Mock schedule data
-  const upcomingSchedule = [
-    {
-      date: "15 Tháng 10, 2027",
-      title: "Kiểm tra Toán",
-      subject: "Toán học",
-      time: "9:00 AM - 10:30 AM"
-    },
-    {
-      date: "1 Tháng 11, 2027",
-      title: "Thuyết trình Văn",
-      subject: "Ngữ văn",
-      time: "2:00 PM - 4:00 PM"
-    },
-    {
-      date: "20 Tháng 11, 2027",
-      title: "Bài kiểm tra Lý",
-      subject: "Vật lý",
-      time: "11:00 AM - 12:30 PM"
-    }
-  ];
+
+  useEffect(() => {
+    const loadSchedule = async () => {
+      if (!user) return;
+
+      // Load user's weekly schedule
+      const { data: weeklySchedule } = await supabase
+        .from("schedules")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("schedule_type", "weekly");
+
+      // Get today's day of week
+      const dayOfWeek = currentDate.getDay();
+      const daysOfWeek = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+      
+      const combinedSchedule: any[] = [];
+
+      // Add user's schedule for today
+      if (weeklySchedule && weeklySchedule[0]?.schedule_data) {
+        const todayClasses = weeklySchedule[0].schedule_data[dayOfWeek] || [];
+        todayClasses.forEach((item: any) => {
+          combinedSchedule.push({
+            date: `Hôm nay - ${daysOfWeek[dayOfWeek]}`,
+            title: item.subject || item.title,
+            subject: item.subject,
+            time: item.time || "Chưa xác định",
+            type: "user_schedule"
+          });
+        });
+      }
+
+      // Add AI-suggested study sessions (mock data - can be replaced with AI generation)
+      const { data: lowScoreSubjects } = await supabase
+        .from("user_scores")
+        .select("*")
+        .eq("user_id", user.id);
+
+      if (lowScoreSubjects) {
+        lowScoreSubjects.forEach((subject: any) => {
+          const scoreValues = Object.values(subject.scores || {}).filter((v): v is number => typeof v === 'number');
+          const avg = scoreValues.length > 0 
+            ? scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length 
+            : 0;
+          
+          if (avg < 6) {
+            combinedSchedule.push({
+              date: "AI đề xuất",
+              title: `Ôn tập ${subject.subject}`,
+              subject: subject.subject,
+              time: "30-60 phút",
+              type: "ai_suggested"
+            });
+          }
+        });
+      }
+
+      setScheduleData(combinedSchedule);
+    };
+
+    loadSchedule();
+  }, [user]);
 
   // Generate calendar days
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
@@ -37,53 +81,6 @@ const RightPanel = () => {
   return (
     <div className="w-80 h-screen bg-card border-l border-border/50 overflow-y-auto sticky top-0">
       <div className="p-6 space-y-6">
-        {/* Performance Card */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Hiệu suất</h3>
-            <button className="text-muted-foreground hover:text-foreground">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="3" r="1.5" fill="currentColor"/>
-                <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
-                <circle cx="8" cy="13" r="1.5" fill="currentColor"/>
-              </svg>
-            </button>
-          </div>
-          
-          {/* Circular Progress */}
-          <div className="relative w-32 h-32 mx-auto mb-4">
-            <svg className="w-32 h-32 transform -rotate-90">
-              <circle
-                cx="64"
-                cy="64"
-                r="56"
-                stroke="hsl(var(--muted))"
-                strokeWidth="12"
-                fill="none"
-              />
-              <circle
-                cx="64"
-                cy="64"
-                r="56"
-                stroke="hsl(var(--primary))"
-                strokeWidth="12"
-                fill="none"
-                strokeDasharray={`${2 * Math.PI * 56 * 0.75} ${2 * Math.PI * 56}`}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold">1.274</span>
-              <span className="text-xs text-muted-foreground">Điểm tổng</span>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-center gap-1 text-sm">
-            <span className="text-warning">🏆</span>
-            <span className="text-muted-foreground">4th trong bảng xếp hạng</span>
-          </div>
-        </Card>
-
         {/* Calendar */}
         <Card className="p-4">
           <div className="flex items-center justify-between mb-4">
@@ -137,53 +134,41 @@ const RightPanel = () => {
           </div>
 
           <div className="space-y-3">
-            {upcomingSchedule.map((item, index) => (
-              <div
-                key={index}
-                className="p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
-              >
-                <div className="text-xs text-primary font-medium mb-1 bg-primary/10 px-2 py-1 rounded inline-block">
-                  {item.date}
+            {scheduleData.length > 0 ? (
+              scheduleData.map((item, index) => (
+                <div
+                  key={index}
+                  className={`p-3 rounded-lg transition-colors cursor-pointer ${
+                    item.type === 'ai_suggested' 
+                      ? 'bg-accent/10 border border-accent/30 hover:bg-accent/20' 
+                      : 'bg-muted/30 hover:bg-muted/50'
+                  }`}
+                >
+                  <div className={`text-xs font-medium mb-1 px-2 py-1 rounded inline-flex items-center gap-1 ${
+                    item.type === 'ai_suggested'
+                      ? 'text-accent bg-accent/10'
+                      : 'text-primary bg-primary/10'
+                  }`}>
+                    {item.type === 'ai_suggested' && <BookOpen className="w-3 h-3" />}
+                    {item.date}
+                  </div>
+                  <h4 className="font-semibold text-sm mb-1">{item.title}</h4>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span>{item.subject}</span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {item.time}
+                    </span>
+                  </div>
                 </div>
-                <h4 className="font-semibold text-sm mb-1">{item.title}</h4>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>{item.subject}</span>
-                  <span>•</span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {item.time}
-                  </span>
-                </div>
-                <button className="text-xs text-primary hover:underline mt-2">
-                  →
-                </button>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Calendar className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Chưa có lịch học</p>
               </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Recent Activities */}
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Hoạt động gần đây</h3>
-            <button className="text-muted-foreground hover:text-foreground">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="3" r="1.5" fill="currentColor"/>
-                <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
-                <circle cx="8" cy="13" r="1.5" fill="currentColor"/>
-              </svg>
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            <div className="text-sm">
-              <div className="font-semibold mb-2">Hôm nay</div>
-              <div className="space-y-2 text-xs text-muted-foreground">
-                <p>Hoàn thành bài kiểm tra Toán</p>
-                <p>Cập nhật lịch học tuần</p>
-                <p>Đạt mục tiêu học tập hàng ngày</p>
-              </div>
-            </div>
+            )}
           </div>
         </Card>
       </div>

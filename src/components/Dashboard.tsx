@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, ListTodo, Trophy, TrendingUp, Check, Smile, Frown, Angry, Calendar, AlertCircle, Flame } from "lucide-react";
+import { CheckCircle2, ListTodo, Trophy, TrendingUp, Check, Smile, Frown, Angry, Calendar, AlertCircle, Flame, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
@@ -12,11 +12,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import confetti from "canvas-confetti";
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [achievementsCount, setAchievementsCount] = useState(0);
   const [streak, setStreak] = useState(0);
+  const [recoveryCount, setRecoveryCount] = useState(3);
+  const [canCheckIn, setCanCheckIn] = useState(false);
+  const [streakData, setStreakData] = useState<any>(null);
   const [todaySchedule, setTodaySchedule] = useState<any[]>([]);
   const [lowScoreSubjects, setLowScoreSubjects] = useState<any[]>([]);
   const [scores, setScores] = useState<any[]>([]);
@@ -37,14 +43,55 @@ const Dashboard = () => {
         .eq("is_unlocked", true);
       setAchievementsCount(achievementsData?.length || 0);
 
-      // Calculate streak (số ngày liên tục đăng nhập)
-      const { data: loginData } = await supabase
-        .from("user_achievements")
+      // Load or initialize streak data
+      let { data: streakInfo } = await supabase
+        .from("user_streaks")
         .select("*")
         .eq("user_id", user.id)
-        .eq("achievement_id", "login_streak")
         .single();
-      setStreak(loginData?.current_progress || 0);
+
+      if (!streakInfo) {
+        // Create new streak record
+        const { data: newStreak } = await supabase
+          .from("user_streaks")
+          .insert({
+            user_id: user.id,
+            current_streak: 0,
+            recovery_count: 3,
+            last_recovery_reset: new Date().toISOString().split('T')[0]
+          })
+          .select()
+          .single();
+        streakInfo = newStreak;
+      }
+
+      if (streakInfo) {
+        setStreakData(streakInfo);
+        setStreak(streakInfo.current_streak);
+        setRecoveryCount(streakInfo.recovery_count);
+
+        // Check if recovery count needs reset (new month)
+        const today = new Date();
+        const lastReset = new Date(streakInfo.last_recovery_reset);
+        if (today.getMonth() !== lastReset.getMonth() || today.getFullYear() !== lastReset.getFullYear()) {
+          await supabase
+            .from("user_streaks")
+            .update({
+              recovery_count: 3,
+              last_recovery_reset: today.toISOString().split('T')[0]
+            })
+            .eq("user_id", user.id);
+          setRecoveryCount(3);
+        }
+
+        // Check if user can check in today
+        const lastCheckIn = streakInfo.last_check_in ? new Date(streakInfo.last_check_in) : null;
+        const todayStr = today.toISOString().split('T')[0];
+        
+        if (!lastCheckIn || lastCheckIn.toISOString().split('T')[0] !== todayStr) {
+          setCanCheckIn(true);
+        }
+      }
 
       // Load today's schedule
       const dayOfWeek = new Date().getDay();
@@ -97,6 +144,88 @@ const Dashboard = () => {
     
     loadData();
   }, [user, selectedGrade, selectedSemester]);
+
+  const handleCheckIn = async () => {
+    if (!user || !canCheckIn) return;
+
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    const lastCheckIn = streakData?.last_check_in ? new Date(streakData.last_check_in) : null;
+    const lastCheckInStr = lastCheckIn?.toISOString().split('T')[0];
+
+    let newStreak = 1;
+    
+    if (lastCheckInStr === yesterdayStr) {
+      // Consecutive day
+      newStreak = (streakData?.current_streak || 0) + 1;
+    } else if (lastCheckInStr === todayStr) {
+      // Already checked in today
+      toast({
+        title: "Đã check-in hôm nay!",
+        description: "Bạn đã check-in rồi, hãy quay lại vào ngày mai nhé!",
+      });
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("user_streaks")
+      .update({
+        current_streak: newStreak,
+        last_check_in: todayStr,
+        longest_streak: Math.max(newStreak, streakData?.longest_streak || 0)
+      })
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+    if (!error && data) {
+      setStreak(newStreak);
+      setStreakData(data);
+      setCanCheckIn(false);
+      
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+      toast({
+        title: "🔥 Check-in thành công!",
+        description: `Chuỗi của bạn: ${newStreak} ngày liên tục!`,
+      });
+    }
+  };
+
+  const handleRecoverStreak = async () => {
+    if (!user || recoveryCount <= 0 || !streakData) return;
+
+    const { data, error } = await supabase
+      .from("user_streaks")
+      .update({
+        current_streak: streakData.longest_streak || 1,
+        recovery_count: recoveryCount - 1,
+        last_check_in: new Date().toISOString().split('T')[0]
+      })
+      .eq("user_id", user.id)
+      .select()
+      .single();
+
+    if (!error && data) {
+      setStreak(data.current_streak);
+      setRecoveryCount(data.recovery_count);
+      setStreakData(data);
+      setCanCheckIn(false);
+
+      toast({
+        title: "✨ Đã khôi phục chuỗi!",
+        description: `Chuỗi của bạn đã được khôi phục. Còn ${data.recovery_count} lần khôi phục trong tháng này.`,
+      });
+    }
+  };
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'bạn';
 
@@ -151,16 +280,36 @@ const Dashboard = () => {
             <p className="text-primary-foreground/90 mb-6">
               Chúng tôi nhớ bạn! Hãy xem những gì mới và cải tiến trong bảng điều khiển của bạn.
             </p>
-            <Button className="bg-white text-primary hover:bg-white/90">
-              <Check className="w-5 h-5" />
-            </Button>
-          </div>
-          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
-            <Flame className="w-8 h-8 text-orange-400" />
-            <div>
-              <p className="text-sm text-primary-foreground/80">Chuỗi liên tục</p>
-              <p className="text-3xl font-bold text-primary-foreground">{streak} ngày</p>
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleCheckIn}
+                disabled={!canCheckIn}
+                className="bg-white text-primary hover:bg-white/90 disabled:opacity-50"
+              >
+                <Check className="w-5 h-5 mr-2" />
+                {canCheckIn ? "Check-in hôm nay" : "Đã check-in"}
+              </Button>
+              {streak === 0 && streakData && streakData.longest_streak > 0 && recoveryCount > 0 && (
+                <Button 
+                  onClick={handleRecoverStreak}
+                  variant="outline"
+                  className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                >
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Khôi phục ({recoveryCount})
+                </Button>
+              )}
             </div>
+          </div>
+          <div className="flex flex-col items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
+            <div className="flex items-center gap-3">
+              <Flame className="w-8 h-8 text-orange-400" />
+              <div>
+                <p className="text-sm text-primary-foreground/80">Chuỗi liên tục</p>
+                <p className="text-3xl font-bold text-primary-foreground">{streak} ngày</p>
+              </div>
+            </div>
+            <p className="text-xs text-primary-foreground/60">Khôi phục còn lại: {recoveryCount}/3</p>
           </div>
         </div>
       </Card>
