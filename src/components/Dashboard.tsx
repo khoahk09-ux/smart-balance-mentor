@@ -1,8 +1,29 @@
 import { Card } from "@/components/ui/card";
 import { CheckCircle2, ListTodo, Trophy, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  const [achievementsCount, setAchievementsCount] = useState(0);
+
+  useEffect(() => {
+    const loadAchievements = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("user_achievements")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("is_unlocked", true);
+      setAchievementsCount(data?.length || 0);
+    };
+    loadAchievements();
+  }, [user]);
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'bạn';
+
   // Mock data
   const weeklyActivity = [
     { day: "CN", ux: 2, frontend: 3, copywriting: 4 },
@@ -40,7 +61,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between relative z-10">
           <div className="flex-1">
             <h2 className="text-3xl font-bold text-primary-foreground mb-2">
-              Xin chào, Gareth!
+              Xin chào bạn đã quay trở lại, {displayName}!
             </h2>
             <p className="text-primary-foreground/90 mb-6">
               Chúng tôi nhớ bạn! Hãy xem những gì mới và cải tiến trong bảng điều khiển của bạn.
@@ -83,8 +104,8 @@ const Dashboard = () => {
               <Trophy className="w-6 h-6 text-warning" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Điểm xếp hạng</p>
-          <p className="text-3xl font-bold">132</p>
+          <p className="text-sm text-muted-foreground mb-1">Thành tích đạt được</p>
+          <p className="text-3xl font-bold">{achievementsCount}</p>
         </Card>
       </div>
 

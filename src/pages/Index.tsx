@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Settings, User, MessageCircle, Bell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import ScoreManagement from "@/components/ScoreManagement";
 import ScheduleTable from "@/components/ScheduleTable";
 import AIChat from "@/components/AIChat";
@@ -17,6 +18,10 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const username = user?.email?.split('@')[0] || 'christopher';
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -111,8 +116,8 @@ const Index = () => {
                 </Button>
                 <div className="flex items-center gap-3 pl-3 border-l border-border">
                   <div className="text-right">
-                    <p className="text-sm font-semibold">Gareth Christopher</p>
-                    <p className="text-xs text-muted-foreground">@christopher</p>
+                    <p className="text-sm font-semibold">{displayName}</p>
+                    <p className="text-xs text-muted-foreground">@{username}</p>
                   </div>
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
                     <User className="w-5 h-5 text-primary-foreground" />
