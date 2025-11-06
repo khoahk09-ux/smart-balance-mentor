@@ -18,10 +18,11 @@ const TIME_SLOTS = [
 
 const MORNING_PERIODS = ["Tiết 1", "Tiết 2", "Tiết 3", "Tiết 4", "Tiết 5"];
 const AFTERNOON_PERIODS = ["Tiết 6", "Tiết 7", "Tiết 8", "Tiết 9", "Tiết 10"];
-const ALL_PERIODS = [...MORNING_PERIODS, ...AFTERNOON_PERIODS];
+const SESSIONS = ["Buổi sáng", "Buổi chiều"];
 
 interface ExtraClass {
   day: string;
+  session: string;
   time: string;
   subject: string;
 }
@@ -107,8 +108,23 @@ const ScheduleTable = () => {
     });
   };
 
-  const addExtraClass = () => {
-    setExtraSchedule([...extraSchedule, { day: DAYS[0], time: TIME_SLOTS[0], subject: "" }]);
+  const handleExtraClassChange = (day: string, session: string, field: 'subject' | 'time', value: string) => {
+    const existingIndex = extraSchedule.findIndex(ec => ec.day === day && ec.session === session);
+    
+    if (existingIndex >= 0) {
+      const updated = [...extraSchedule];
+      updated[existingIndex] = { ...updated[existingIndex], [field]: value };
+      setExtraSchedule(updated);
+    } else {
+      // Tạo mới nếu chưa tồn tại
+      const newClass: ExtraClass = {
+        day,
+        session,
+        time: field === 'time' ? value : '',
+        subject: field === 'subject' ? value : ''
+      };
+      setExtraSchedule([...extraSchedule, newClass]);
+    }
   };
 
   const updateExtraClass = (index: number, field: keyof ExtraClass, value: string) => {
@@ -324,59 +340,60 @@ const ScheduleTable = () => {
               </div>
             </Card>
 
-            <div className="space-y-3">
-              {extraSchedule.map((extraClass, index) => (
-                <Card key={index} className="p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                    <Select
-                      value={extraClass.day}
-                      onValueChange={(value) => updateExtraClass(index, "day", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn thứ" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {DAYS.map(day => (
-                          <SelectItem key={day} value={day}>{day}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <Select
-                      value={extraClass.time}
-                      onValueChange={(value) => updateExtraClass(index, "time", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn giờ" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {TIME_SLOTS.map(time => (
-                          <SelectItem key={time} value={time}>{time}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <Input
-                      value={extraClass.subject}
-                      onChange={(e) => updateExtraClass(index, "subject", e.target.value)}
-                      placeholder="Tên môn học..."
-                      className="md:col-span-1"
-                    />
-
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => removeExtraClass(index)}
-                    >
-                      Xóa
-                    </Button>
+            <div className="overflow-x-auto">
+              <div className="min-w-[600px]">
+                <div className="grid grid-cols-8 gap-2">
+                  <div className="font-semibold text-center p-3 bg-primary/10 rounded-lg">
+                    Buổi
                   </div>
-                </Card>
-              ))}
+                  {DAYS.map(day => (
+                    <div key={day} className="font-semibold text-center p-3 bg-primary/10 rounded-lg text-sm">
+                      {day}
+                    </div>
+                  ))}
 
-              <Button onClick={addExtraClass} variant="outline" className="w-full">
-                + Thêm môn học thêm
-              </Button>
+                  {SESSIONS.map(session => (
+                    <>
+                      <div key={`session-${session}`} className="text-sm font-medium p-3 bg-muted/30 rounded-lg flex items-center justify-center">
+                        {session}
+                      </div>
+                      {DAYS.map(day => {
+                        const existingClass = extraSchedule.find(
+                          ec => ec.day === day && ec.session === session
+                        );
+                        
+                        return (
+                          <div key={`${day}-${session}`} className="p-1">
+                            <div className="space-y-1">
+                              <Input
+                                value={existingClass?.subject || ""}
+                                onChange={(e) => handleExtraClassChange(day, session, 'subject', e.target.value)}
+                                placeholder="Môn học..."
+                                className="h-10 text-center text-sm"
+                              />
+                              <Select
+                                value={existingClass?.time || ""}
+                                onValueChange={(value) => handleExtraClassChange(day, session, 'time', value)}
+                              >
+                                <SelectTrigger className="h-8 text-xs">
+                                  <SelectValue placeholder="Giờ" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {TIME_SLOTS.map(time => (
+                                    <SelectItem key={time} value={time} className="text-xs">
+                                      {time}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="flex justify-end">
