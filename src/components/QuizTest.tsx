@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Database } from "@/integrations/supabase/types";
+import MathRenderer from "./MathRenderer";
 
 const SUBJECTS = [
   "Toán", "Vật lý", "Hóa học", "Văn", "Anh văn",
@@ -433,7 +434,10 @@ const QuizTest = () => {
                         {q.type === "short_answer" && "Trả lời ngắn"}
                       </Badge>
                     </div>
-                    <p className="font-semibold mb-2">Câu {idx + 1}: {q.question}</p>
+                    <div className="mb-2">
+                      <span className="font-semibold">Câu {idx + 1}: </span>
+                      <MathRenderer content={q.question} className="inline" />
+                    </div>
                     
                     {q.type === "multiple_choice" && q.options && (
                       <div className="space-y-2">
@@ -446,7 +450,7 @@ const QuizTest = () => {
                               'bg-muted/30'
                             }`}
                           >
-                            {option}
+                            <MathRenderer content={option} className="inline" />
                             {optIdx === q.correctAnswer && " ✓"}
                           </div>
                         ))}
@@ -491,7 +495,7 @@ const QuizTest = () => {
                     
                     <div className="mt-3 p-3 rounded-lg bg-accent/10 border border-accent/20">
                       <p className="text-sm font-medium mb-1">Giải thích:</p>
-                      <p className="text-sm text-muted-foreground">{q.explanation}</p>
+                      <MathRenderer content={q.explanation} className="text-sm text-muted-foreground" />
                     </div>
                   </div>
                 </div>
@@ -540,7 +544,7 @@ const QuizTest = () => {
             </Badge>
           </div>
           
-          <p className="text-lg font-medium">{currentQ?.question}</p>
+          <MathRenderer content={currentQ?.question || ""} className="text-lg font-medium" />
           
           <div className="space-y-2">
             {currentQ?.type === "multiple_choice" && currentQ.options?.map((option, idx) => (
@@ -554,7 +558,7 @@ const QuizTest = () => {
                 }`}
               >
                 <span className="font-medium mr-3">{String.fromCharCode(65 + idx)}.</span>
-                {option}
+                <MathRenderer content={option} className="inline" />
               </button>
             ))}
             

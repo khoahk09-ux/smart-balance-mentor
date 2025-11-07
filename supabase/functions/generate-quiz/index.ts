@@ -30,6 +30,18 @@ Hãy tạo ${numQuestions} câu hỏi cho môn ${subject}, khối ${grade}${topi
 
 ${difficultyText}
 
+QUAN TRỌNG VỀ CÔNG THỨC TOÁN HỌC:
+- Tất cả công thức toán, hóa, sinh học PHẢI sử dụng cú pháp LaTeX/KaTeX
+- Công thức hiển thị riêng (display math): sử dụng $$...$$
+  Ví dụ: $$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
+- Công thức nội tuyến (inline math): sử dụng $...$ hoặc \\(...\\)
+  Ví dụ: Phương trình $ax^2 + bx + c = 0$ có nghiệm...
+- Chỉ số trên: $x^2$, $10^{-3}$
+- Chỉ số dưới: $H_2O$, $CO_2$
+- Phân số: $\\frac{a}{b}$
+- Căn: $\\sqrt{x}$, $\\sqrt[3]{x}$
+- Ký hiệu Hy Lạp: $\\alpha$, $\\beta$, $\\pi$, $\\Delta$
+
 QUAN TRỌNG: Bài kiểm tra phải bao gồm cả 3 dạng câu hỏi:
 1. Trắc nghiệm (Multiple Choice) - khoảng 60% số câu
 2. Đúng/Sai (True/False) - khoảng 20% số câu  

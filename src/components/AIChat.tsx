@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Bot, User } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import MathRenderer from "./MathRenderer";
 
 interface Message {
   role: "user" | "assistant";
@@ -185,7 +186,7 @@ const AIChat = () => {
                         : "bg-card border border-border"
                     }`}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <MathRenderer content={message.content} className="text-sm whitespace-pre-wrap" />
                   </div>
                   {message.role === "user" && (
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-accent/70 flex items-center justify-center flex-shrink-0">
