@@ -207,44 +207,227 @@ const ScheduleTable = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <Tabs defaultValue="today" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="today">Ôn Hôm Nay</TabsTrigger>
-          <TabsTrigger value="badges">Huy Hiệu</TabsTrigger>
+      <Tabs defaultValue="school" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="school">📚 Lịch Trường</TabsTrigger>
+          <TabsTrigger value="extra">⏰ Học Thêm</TabsTrigger>
+          <TabsTrigger value="ai">🤖 Lịch AI</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="today" className="mt-6">
-          <TodayReviewSchedule />
+
+        {/* Phần 1: Lịch học trên trường */}
+        <TabsContent value="school" className="mt-6">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <BookOpen className="w-6 h-6" />
+                  Thời khóa biểu trên trường
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Nhập lịch học chính thức của bạn theo tiết
+                </p>
+              </div>
+              <Button onClick={handleSaveSchoolSchedule}>
+                <Save className="w-4 h-4 mr-2" />
+                Lưu lịch trường
+              </Button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b">
+                    <th className="p-3 text-left font-semibold bg-muted/50">Tiết / Thứ</th>
+                    {DAYS.map(day => (
+                      <th key={day} className="p-3 text-center font-semibold bg-muted/50 min-w-[120px]">
+                        {day}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...MORNING_PERIODS, ...AFTERNOON_PERIODS].map((period, idx) => (
+                    <tr key={period} className={`border-b hover:bg-muted/20 ${idx === 5 ? 'border-t-2 border-primary/20' : ''}`}>
+                      <td className="p-3 font-medium text-muted-foreground">
+                        {period}
+                      </td>
+                      {DAYS.map(day => (
+                        <td key={`${day}-${period}`} className="p-2">
+                          <Input
+                            value={schoolSchedule[day]?.[period] || ""}
+                            onChange={(e) => handleSchoolCellChange(day, period, e.target.value)}
+                            placeholder="Môn học"
+                            className="text-center border-dashed"
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
         </TabsContent>
-        
-        <TabsContent value="badges" className="mt-6">
-          <ReviewBadges />
+
+        {/* Phần 2: Lịch học thêm */}
+        <TabsContent value="extra" className="mt-6">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Clock className="w-6 h-6" />
+                  Lịch học thêm
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Thêm các lớp học thêm với thời gian và địa điểm cụ thể
+                </p>
+              </div>
+              <Button onClick={handleSaveExtraSchedule}>
+                <Save className="w-4 h-4 mr-2" />
+                Lưu lịch học thêm
+              </Button>
+            </div>
+
+            <div className="grid gap-4">
+              {DAYS.map(day => (
+                <Card key={day} className="p-4 border-l-4 border-l-primary/50">
+                  <h3 className="font-semibold text-lg mb-3">{day}</h3>
+                  <div className="space-y-3">
+                    {SESSIONS.map((session) => {
+                      const classesInSlot = extraSchedule.filter(
+                        ec => ec.day === day && ec.session === session
+                      );
+                      
+                      return (
+                        <div key={session} className="space-y-2">
+                          <div className="text-sm font-medium text-muted-foreground">{session}</div>
+                          {classesInSlot.map((extraClass, idx) => (
+                            <div key={idx} className="flex gap-2 items-center bg-muted/30 p-3 rounded-lg">
+                              <Input
+                                placeholder="Môn học"
+                                value={extraClass.subject}
+                                onChange={(e) => handleExtraClassChange(day, session, idx, 'subject', e.target.value)}
+                                className="flex-1"
+                              />
+                              <Select
+                                value={extraClass.time}
+                                onValueChange={(value) => handleExtraClassChange(day, session, idx, 'time', value)}
+                              >
+                                <SelectTrigger className="w-[180px]">
+                                  <SelectValue placeholder="Chọn giờ" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {TIME_SLOTS.map(slot => (
+                                    <SelectItem key={slot} value={slot}>{slot}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                variant="destructive"
+                                size="icon"
+                                onClick={() => removeExtraClassFromSlot(day, session, idx)}
+                              >
+                                ✕
+                              </Button>
+                            </div>
+                          ))}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => addExtraClassToSlot(day, session)}
+                            className="w-full"
+                          >
+                            + Thêm lớp {session.toLowerCase()}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </Card>
+        </TabsContent>
+
+        {/* Phần 3: Lịch AI phân bố */}
+        <TabsContent value="ai" className="mt-6">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold flex items-center gap-2">
+                  <Brain className="w-6 h-6" />
+                  Lịch luyện tập & ôn tập do AI phân bố
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  AI tự động tạo lịch học dựa trên lịch trường và học thêm của bạn
+                </p>
+              </div>
+              <Button onClick={generateAISchedule} variant="default">
+                <Sparkles className="w-4 h-4 mr-2" />
+                Tạo lịch AI
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {DAYS.map(day => {
+                const daySchedule = aiSchedule[day] || [];
+                if (daySchedule.length === 0) return null;
+
+                return (
+                  <Card key={day} className="p-4 border-l-4 border-l-emerald-500/50">
+                    <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                      <Calendar className="w-5 h-5" />
+                      {day}
+                    </h3>
+                    <div className="space-y-2">
+                      {daySchedule.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex items-center gap-3 p-3 rounded-lg ${
+                            item.type === 'study' ? 'bg-blue-500/10 border border-blue-500/20' :
+                            item.type === 'homework' ? 'bg-purple-500/10 border border-purple-500/20' :
+                            'bg-emerald-500/10 border border-emerald-500/20'
+                          }`}
+                        >
+                          <Clock className="w-4 h-4 text-muted-foreground" />
+                          <span className="font-medium min-w-[120px]">{item.time}</span>
+                          <span className="flex-1">{item.activity}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                );
+              })}
+              
+              {Object.keys(aiSchedule).length === 0 && (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Brain className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>Chưa có lịch AI. Hãy thêm lịch học thêm và nhấn "Tạo lịch AI"</p>
+                </div>
+              )}
+            </div>
+          </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 bg-gradient-to-br from-blue-500/10 to-transparent border-blue-500/20">
-          <h3 className="font-semibold mb-2">📚 Lịch trường</h3>
-          <p className="text-sm text-muted-foreground">
-            Quản lý lịch học chính thức trên trường theo buổi
-          </p>
-        </Card>
-
-        <Card className="p-4 bg-gradient-to-br from-purple-500/10 to-transparent border-purple-500/20">
-          <h3 className="font-semibold mb-2">⏰ Học thêm</h3>
-          <p className="text-sm text-muted-foreground">
-            Thêm các lớp học thêm với thời gian cụ thể
-          </p>
-        </Card>
-
-        <Card className="p-4 bg-gradient-to-br from-emerald-500/10 to-transparent border-emerald-500/20">
-          <h3 className="font-semibold mb-2">🤖 AI tối ưu</h3>
-          <p className="text-sm text-muted-foreground">
-            AI tự động phân bổ thời gian học tập hiệu quả
-          </p>
-        </Card>
-      </div>
+      {/* Phần ôn tập theo chu kỳ */}
+      <Card className="p-6 bg-gradient-to-br from-primary/5 to-transparent">
+        <h2 className="text-xl font-bold mb-4">📝 Ôn tập theo chu kỳ</h2>
+        <Tabs defaultValue="today" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="today">Ôn Hôm Nay</TabsTrigger>
+            <TabsTrigger value="badges">Huy Hiệu</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="today" className="mt-6">
+            <TodayReviewSchedule />
+          </TabsContent>
+          
+          <TabsContent value="badges" className="mt-6">
+            <ReviewBadges />
+          </TabsContent>
+        </Tabs>
+      </Card>
     </div>
   );
 };
