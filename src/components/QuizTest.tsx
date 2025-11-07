@@ -46,6 +46,7 @@ const QuizTest = () => {
   const [grade, setGrade] = useState("");
   const [topic, setTopic] = useState("");
   const [numQuestions, setNumQuestions] = useState("10");
+  const [difficulty, setDifficulty] = useState("medium");
   const [isGenerating, setIsGenerating] = useState(false);
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -92,7 +93,8 @@ const QuizTest = () => {
           subject, 
           grade, 
           topic: topic || undefined,
-          numQuestions: parseInt(numQuestions) || 10
+          numQuestions: parseInt(numQuestions) || 10,
+          difficulty
         }
       });
 
@@ -326,6 +328,20 @@ const QuizTest = () => {
                   <SelectItem value="10">10 câu</SelectItem>
                   <SelectItem value="15">15 câu</SelectItem>
                   <SelectItem value="20">20 câu</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Cấp độ</Label>
+              <Select value={difficulty} onValueChange={setDifficulty}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="easy">Dễ (Học sinh yếu)</SelectItem>
+                  <SelectItem value="medium">Trung bình (Học sinh khá)</SelectItem>
+                  <SelectItem value="hard">Nâng cao (Học sinh giỏi)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

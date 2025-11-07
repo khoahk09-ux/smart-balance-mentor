@@ -11,16 +11,24 @@ serve(async (req) => {
   }
 
   try {
-    const { subject, grade, topic, numQuestions = 10 } = await req.json();
+    const { subject, grade, topic, numQuestions = 10, difficulty = "medium" } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    const difficultyText = difficulty === "easy" 
+      ? "CẤP ĐỘ DỄ - Phù hợp với học sinh yếu:\n- Câu hỏi cơ bản, dễ hiểu\n- Kiến thức nền tảng, không quá phức tạp\n- Tập trung vào khái niệm chính\n- Ít bẫy và đáp án nhiễu"
+      : difficulty === "hard"
+      ? "CẤP ĐỘ NÂNG CAO - Phù hợp với học sinh giỏi:\n- Câu hỏi tư duy cao, đòi hỏi phân tích sâu\n- Kết hợp nhiều kiến thức\n- Có thể có bẫy và đáp án nhiễu\n- Yêu cầu vận dụng linh hoạt"
+      : "CẤP ĐỘ TRUNG BÌNH - Phù hợp với học sinh khá:\n- Câu hỏi vừa phải, cần hiểu bài\n- Kết hợp lý thuyết và thực hành\n- Đáp án tương đối rõ ràng\n- Yêu cầu nắm vững kiến thức";
+
     const systemPrompt = `Bạn là một giáo viên chuyên nghiệp tạo bài kiểm tra cho học sinh Việt Nam.
     
 Hãy tạo ${numQuestions} câu hỏi cho môn ${subject}, khối ${grade}${topic ? `, chủ đề: ${topic}` : ''}.
+
+${difficultyText}
 
 QUAN TRỌNG: Bài kiểm tra phải bao gồm cả 3 dạng câu hỏi:
 1. Trắc nghiệm (Multiple Choice) - khoảng 60% số câu
@@ -59,7 +67,7 @@ Yêu cầu:
 - Đúng/Sai: correctAnswer là "true" hoặc "false"
 - Trả lời ngắn: correctAnswer là chuỗi văn bản ngắn gọn
 - Giải thích ngắn gọn, dễ hiểu cho học sinh
-- Độ khó phù hợp với trình độ
+- Độ khó phải phù hợp với cấp độ ${difficulty === "easy" ? "DỄ" : difficulty === "hard" ? "NÂNG CAO" : "TRUNG BÌNH"}
 
 CHỈ TRẢ VỀ JSON, KHÔNG THÊM TEXT HAY MARKDOWN.`;
 
