@@ -40,8 +40,11 @@ export type Database = {
       }
       quiz_mistakes: {
         Row: {
+          chapter: string | null
           correct_answer: string
           created_at: string | null
+          difficulty_level: string | null
+          error_type: string | null
           explanation: string
           grade: string
           id: string
@@ -51,12 +54,16 @@ export type Database = {
           quiz_result_id: string | null
           reviewed_at: string | null
           subject: string
+          times_repeated: number | null
           user_answer: string | null
           user_id: string
         }
         Insert: {
+          chapter?: string | null
           correct_answer: string
           created_at?: string | null
+          difficulty_level?: string | null
+          error_type?: string | null
           explanation: string
           grade: string
           id?: string
@@ -66,12 +73,16 @@ export type Database = {
           quiz_result_id?: string | null
           reviewed_at?: string | null
           subject: string
+          times_repeated?: number | null
           user_answer?: string | null
           user_id: string
         }
         Update: {
+          chapter?: string | null
           correct_answer?: string
           created_at?: string | null
+          difficulty_level?: string | null
+          error_type?: string | null
           explanation?: string
           grade?: string
           id?: string
@@ -81,6 +92,7 @@ export type Database = {
           quiz_result_id?: string | null
           reviewed_at?: string | null
           subject?: string
+          times_repeated?: number | null
           user_answer?: string | null
           user_id?: string
         }
@@ -309,7 +321,21 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      mistake_statistics: {
+        Row: {
+          calculation_errors: number | null
+          data_errors: number | null
+          formula_errors: number | null
+          repeat_rate: number | null
+          repeated_mistakes: number | null
+          subject: string | null
+          theory_errors: number | null
+          total_mistakes: number | null
+          unreviewed_count: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
