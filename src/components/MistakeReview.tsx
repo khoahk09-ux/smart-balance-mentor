@@ -10,6 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import MathRenderer from "./MathRenderer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import MistakeStatsDashboard from "./MistakeStatsDashboard";
+import MistakeAIExplainer from "./MistakeAIExplainer";
+import PracticeQuizGenerator from "./PracticeQuizGenerator";
 
 const SUBJECTS = [
   "Toán", "Vật lý", "Hóa học", "Văn", "Anh văn",
@@ -139,6 +142,8 @@ const MistakeReview = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      <MistakeStatsDashboard />
+      
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -256,6 +261,16 @@ const MistakeReview = () => {
                   <div className="p-3 rounded-lg bg-accent/10 border border-accent/20">
                     <p className="text-sm font-medium mb-1">Giải thích:</p>
                     <MathRenderer content={mistake.explanation} className="text-sm text-muted-foreground" />
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    <MistakeAIExplainer mistake={mistake} />
+                    <PracticeQuizGenerator 
+                      mistake={mistake} 
+                      mistakeHistory={mistakes.filter(m => 
+                        m.subject === mistake.subject && m.id !== mistake.id
+                      )}
+                    />
                   </div>
 
                   <div className="flex gap-2 mt-4">
