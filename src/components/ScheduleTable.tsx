@@ -7,7 +7,7 @@ import { Calendar, Save, Clock, BookOpen, Brain, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import TodayReviewSchedule from "./TodayReviewSchedule";
 import ReviewBadges from "./ReviewBadges";
 
@@ -309,19 +309,12 @@ const ScheduleTable = () => {
                                 onChange={(e) => handleExtraClassChange(day, session, idx, 'subject', e.target.value)}
                                 className="flex-1"
                               />
-                              <Select
+                              <Input
+                                placeholder="VD: 18:00 - 19:30"
                                 value={extraClass.time}
-                                onValueChange={(value) => handleExtraClassChange(day, session, idx, 'time', value)}
-                              >
-                                <SelectTrigger className="w-[180px]">
-                                  <SelectValue placeholder="Chọn giờ" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {TIME_SLOTS.map(slot => (
-                                    <SelectItem key={slot} value={slot}>{slot}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
+                                onChange={(e) => handleExtraClassChange(day, session, idx, 'time', e.target.value)}
+                                className="w-[180px]"
+                              />
                               <Button
                                 variant="destructive"
                                 size="icon"
