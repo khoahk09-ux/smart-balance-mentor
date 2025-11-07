@@ -1,10 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, User, MessageCircle, Bell } from "lucide-react";
+import { LogOut, Settings, User, MessageCircle, Bell, Languages } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import ScoreManagement from "@/components/ScoreManagement";
 import ScheduleTable from "@/components/ScheduleTable";
 import AIChat from "@/components/AIChat";
@@ -19,6 +28,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const username = user?.email?.split('@')[0] || 'christopher';
@@ -26,8 +36,8 @@ const Index = () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast({
-      title: 'Đã đăng xuất',
-      description: 'Hẹn gặp lại bạn!',
+      title: t('logoutSuccess'),
+      description: t('logoutMessage'),
     });
     navigate('/auth');
   };
@@ -48,16 +58,47 @@ const Index = () => {
         return <AIChat />;
       case "profile":
         return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Cài đặt</h2>
-            <div className="space-y-4">
+          <div className="p-6 max-w-2xl">
+            <h2 className="text-2xl font-bold mb-6">{t('settings')}</h2>
+            <div className="space-y-6">
+              {/* Language Settings */}
+              <div className="space-y-3 p-4 border border-border rounded-lg bg-card">
+                <div className="flex items-center gap-2 mb-2">
+                  <Languages className="w-5 h-5 text-primary" />
+                  <Label className="text-base font-semibold">{t('languageSettings')}</Label>
+                </div>
+                <Select value={language} onValueChange={(value: 'vi' | 'en' | 'zh') => setLanguage(value)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={t('selectLanguage')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="vi">
+                      <span className="flex items-center gap-2">
+                        🇻🇳 {t('vietnamese')}
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="en">
+                      <span className="flex items-center gap-2">
+                        🇬🇧 {t('english')}
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="zh">
+                      <span className="flex items-center gap-2">
+                        🇨🇳 {t('chinese')}
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Other Settings */}
               <Button
                 variant="outline"
                 onClick={() => navigate('/subject-selection')}
                 className="w-full justify-start"
               >
                 <Settings className="w-4 h-4 mr-2" />
-                Môn chuyên
+                {t('specializedSubject')}
               </Button>
               <Button
                 variant="outline"
@@ -65,7 +106,7 @@ const Index = () => {
                 className="w-full justify-start text-destructive hover:text-destructive"
               >
                 <LogOut className="w-4 h-4 mr-2" />
-                Đăng xuất
+                {t('logout')}
               </Button>
             </div>
           </div>
@@ -88,13 +129,13 @@ const Index = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold capitalize">
-                  {activeTab === "dashboard" ? "Dashboard" : 
-                   activeTab === "scores" ? "Điểm số" :
-                   activeTab === "quiz" ? "Kiểm tra" :
-                   activeTab === "schedule" ? "Lịch học" :
-                   activeTab === "achievements" ? "Thành tích" :
-                   activeTab === "ai-tutor" ? "AI Chat" :
-                   "Cài đặt"}
+                  {activeTab === "dashboard" ? t('dashboard') : 
+                   activeTab === "scores" ? t('scores') :
+                   activeTab === "quiz" ? t('quiz') :
+                   activeTab === "schedule" ? t('schedule') :
+                   activeTab === "achievements" ? t('achievements') :
+                   activeTab === "ai-tutor" ? t('aiChat') :
+                   t('settings')}
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   {new Date().toLocaleDateString('vi-VN', { 

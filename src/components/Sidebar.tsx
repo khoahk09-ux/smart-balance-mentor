@@ -1,5 +1,6 @@
 import { BookOpen, BarChart3, Target, Calendar, MessageSquare, Settings, Brain, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface SidebarProps {
   activeTab: string;
@@ -7,14 +8,16 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
+  const { t } = useLanguage();
+  
   const menuItems = [
-    { id: "dashboard", label: "Dashboard", icon: BarChart3 },
-    { id: "scores", label: "Điểm số", icon: Target },
-    { id: "quiz", label: "Kiểm tra", icon: Brain },
-    { id: "schedule", label: "Lịch học", icon: Calendar },
-    { id: "achievements", label: "Thành tích", icon: Trophy },
-    { id: "ai-tutor", label: "AI Chat", icon: MessageSquare },
-    { id: "profile", label: "Cài đặt", icon: Settings },
+    { id: "dashboard", label: t('dashboard'), icon: BarChart3 },
+    { id: "scores", label: t('scores'), icon: Target },
+    { id: "quiz", label: t('quiz'), icon: Brain },
+    { id: "schedule", label: t('schedule'), icon: Calendar },
+    { id: "achievements", label: t('achievements'), icon: Trophy },
+    { id: "ai-tutor", label: t('aiChat'), icon: MessageSquare },
+    { id: "profile", label: t('settings'), icon: Settings },
   ];
 
   return (
@@ -27,9 +30,9 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
           </div>
           <div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              SmartStudy
+              {t('appName')}
             </h1>
-            <p className="text-xs text-muted-foreground">Balance</p>
+            <p className="text-xs text-muted-foreground">{t('appSubtitle')}</p>
           </div>
         </div>
       </div>
