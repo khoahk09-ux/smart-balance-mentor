@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { CheckCircle2, ListTodo, Trophy, TrendingUp, Check, Smile, Frown, Angry, Calendar, AlertCircle, Flame, RotateCcw, Meh } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
@@ -18,6 +19,7 @@ import confetti from "canvas-confetti";
 const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [achievementsCount, setAchievementsCount] = useState(0);
   const [streak, setStreak] = useState(0);
   const [recoveryCount, setRecoveryCount] = useState(3);
@@ -165,8 +167,8 @@ const Dashboard = () => {
     } else if (lastCheckInStr === todayStr) {
       // Already checked in today
       toast({
-        title: "Đã check-in hôm nay!",
-        description: "Bạn đã check-in rồi, hãy quay lại vào ngày mai nhé!",
+        title: t('alreadyCheckedIn'),
+        description: t('comeBackTomorrow'),
       });
       return;
     }
@@ -194,8 +196,8 @@ const Dashboard = () => {
       });
 
       toast({
-        title: "🔥 Check-in thành công!",
-        description: `Chuỗi của bạn: ${newStreak} ngày liên tục!`,
+        title: t('checkInSuccess'),
+        description: t('streakMessage').replace('{streak}', newStreak.toString()),
       });
     }
   };
@@ -221,8 +223,8 @@ const Dashboard = () => {
       setCanCheckIn(false);
 
       toast({
-        title: "✨ Đã khôi phục chuỗi!",
-        description: `Chuỗi của bạn đã được khôi phục. Còn ${data.recovery_count} lần khôi phục trong tháng này.`,
+        title: t('recoveredStreak'),
+        description: t('recoveryMessage').replace('{count}', data.recovery_count.toString()),
       });
     }
   };
@@ -234,19 +236,19 @@ const Dashboard = () => {
     if (averageScore >= 8) {
       return {
         icon: Smile,
-        message: "Bạn đang làm rất tốt cố lên!!",
+        message: t('doingGreat'),
         color: "text-success"
       };
     } else if (averageScore >= 5) {
       return {
         icon: Meh,
-        message: "Bạn cần cố gắng hơn nhé, cố lên nào",
+        message: t('needMoreEffort'),
         color: "text-warning"
       };
     } else {
       return {
         icon: Angry,
-        message: "Bạn đang không cố gắng, cần cố gắng hơn nữa nhé",
+        message: t('notTryingHard'),
         color: "text-destructive"
       };
     }
@@ -290,10 +292,10 @@ const Dashboard = () => {
         <div className="flex items-center justify-between relative z-10">
           <div className="flex-1">
             <h2 className="text-3xl font-bold text-primary-foreground mb-2">
-              Xin chào bạn đã quay trở lại, {displayName}!
+              {t('welcomeBack')}, {displayName}!
             </h2>
             <p className="text-primary-foreground/90 mb-6">
-              Chúng tôi nhớ bạn! Hãy xem những gì mới và cải tiến trong bảng điều khiển của bạn.
+              {t('welcomeMessage')}
             </p>
             <div className="flex gap-2">
               <Button 
@@ -302,7 +304,7 @@ const Dashboard = () => {
                 className="bg-white text-primary hover:bg-white/90 disabled:opacity-50"
               >
                 <Check className="w-5 h-5 mr-2" />
-                {canCheckIn ? "Check-in hôm nay" : "Đã check-in"}
+                {canCheckIn ? t('checkInToday') : t('checkedIn')}
               </Button>
               {streak === 0 && streakData && streakData.longest_streak > 0 && recoveryCount > 0 && (
                 <Button 
@@ -311,7 +313,7 @@ const Dashboard = () => {
                   className="bg-white/10 text-white border-white/20 hover:bg-white/20"
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
-                  Khôi phục ({recoveryCount})
+                  {t('recover')} ({recoveryCount})
                 </Button>
               )}
             </div>
@@ -320,11 +322,11 @@ const Dashboard = () => {
             <div className="flex items-center gap-3">
               <Flame className="w-8 h-8 text-orange-400" />
               <div>
-                <p className="text-sm text-primary-foreground/80">Chuỗi liên tục</p>
-                <p className="text-3xl font-bold text-primary-foreground">{streak} ngày</p>
+                <p className="text-sm text-primary-foreground/80">{t('streak')}</p>
+                <p className="text-3xl font-bold text-primary-foreground">{streak} {t('days')}</p>
               </div>
             </div>
-            <p className="text-xs text-primary-foreground/60">Khôi phục còn lại: {recoveryCount}/3</p>
+            <p className="text-xs text-primary-foreground/60">{t('recoveryLeft')}: {recoveryCount}/3</p>
           </div>
         </div>
       </Card>
@@ -337,7 +339,7 @@ const Dashboard = () => {
               <Calendar className="w-6 h-6 text-primary" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Lịch học hôm nay</p>
+          <p className="text-sm text-muted-foreground mb-1">{t('todaySchedule')}</p>
           <div className="mt-3 space-y-2">
             {todaySchedule.length > 0 ? (
               todaySchedule.slice(0, 2).map((item: any, idx: number) => (
@@ -348,7 +350,7 @@ const Dashboard = () => {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">Không có lịch học hôm nay</p>
+              <p className="text-sm text-muted-foreground">{t('noScheduleToday')}</p>
             )}
           </div>
         </Card>
@@ -359,7 +361,7 @@ const Dashboard = () => {
               <AlertCircle className="w-6 h-6 text-destructive" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Môn điểm còn thấp</p>
+          <p className="text-sm text-muted-foreground mb-1">{t('lowScoreSubjects')}</p>
           <div className="mt-3 space-y-2">
             {lowScoreSubjects.length > 0 ? (
               lowScoreSubjects.slice(0, 2).map((item: any, idx: number) => (
@@ -369,7 +371,7 @@ const Dashboard = () => {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-success">Tất cả môn đều tốt!</p>
+              <p className="text-sm text-success">{t('allSubjectsGood')}</p>
             )}
           </div>
         </Card>
@@ -380,7 +382,7 @@ const Dashboard = () => {
               <Trophy className="w-6 h-6 text-warning" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Thành tích đạt được</p>
+          <p className="text-sm text-muted-foreground mb-1">{t('achievementsEarned')}</p>
           <p className="text-3xl font-bold">{achievementsCount}</p>
         </Card>
 
@@ -393,7 +395,7 @@ const Dashboard = () => {
             }`}>
               <MoodIcon className={`w-12 h-12 ${moodData.color}`} />
             </div>
-            <p className="text-sm text-muted-foreground mb-1">Điểm trung bình</p>
+            <p className="text-sm text-muted-foreground mb-1">{t('averageScore')}</p>
             <p className="text-3xl font-bold mb-2">{averageScore > 0 ? averageScore.toFixed(1) : '--'}</p>
             <p className={`text-center font-medium text-sm ${moodData.color}`}>
               {moodData.message}
@@ -408,7 +410,7 @@ const Dashboard = () => {
       {/* Subjects Need More Study */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold">Những môn cần học nhiều hơn</h3>
+          <h3 className="text-lg font-semibold">{t('subjectsNeedImprovement')}</h3>
         </div>
 
         <div className="space-y-4">
@@ -427,12 +429,12 @@ const Dashboard = () => {
                     </div>
                   <div>
                     <h4 className="font-semibold">{subject.subject}</h4>
-                    <p className="text-sm text-muted-foreground">Điểm trung bình: {avg.toFixed(1)}</p>
+                    <p className="text-sm text-muted-foreground">{t('averageScore')}: {avg.toFixed(1)}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-destructive">Bạn cần ôn tập thêm môn này để cải thiện kết quả</p>
-                  <p className="text-xs text-muted-foreground">Khối {subject.grade} - Kỳ {subject.semester}</p>
+                  <p className="text-sm font-medium text-destructive">{t('needToStudyMore')}</p>
+                  <p className="text-xs text-muted-foreground">{t('class')} {subject.grade} - {t('semester')} {subject.semester}</p>
                 </div>
                 </div>
               );
@@ -440,8 +442,8 @@ const Dashboard = () => {
           ) : (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <CheckCircle2 className="w-16 h-16 text-success mb-4" />
-              <p className="text-lg font-semibold text-success">Xuất sắc!</p>
-              <p className="text-sm text-muted-foreground mt-2">Tất cả các môn đều có điểm tốt. Hãy tiếp tục phát huy!</p>
+              <p className="text-lg font-semibold text-success">{t('excellent')}</p>
+              <p className="text-sm text-muted-foreground mt-2">{t('keepItUp')}</p>
             </div>
           )}
         </div>
