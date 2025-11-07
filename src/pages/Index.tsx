@@ -20,6 +20,7 @@ import AIChat from "@/components/AIChat";
 import Dashboard from "@/components/Dashboard";
 import QuizTest from "@/components/QuizTest";
 import Achievements from "@/components/Achievements";
+import MistakeReview from "@/components/MistakeReview";
 import Sidebar from "@/components/Sidebar";
 import RightPanel from "@/components/RightPanel";
 
@@ -50,6 +51,8 @@ const Index = () => {
         return <ScoreManagement />;
       case "quiz":
         return <QuizTest />;
+      case "mistakes":
+        return <MistakeReview />;
       case "schedule":
         return <ScheduleTable />;
       case "achievements":
@@ -132,6 +135,7 @@ const Index = () => {
                   {activeTab === "dashboard" ? t('dashboard') : 
                    activeTab === "scores" ? t('scores') :
                    activeTab === "quiz" ? t('quiz') :
+                   activeTab === "mistakes" ? "Ôn tập lỗi sai" :
                    activeTab === "schedule" ? t('schedule') :
                    activeTab === "achievements" ? t('achievements') :
                    activeTab === "ai-tutor" ? t('aiChat') :

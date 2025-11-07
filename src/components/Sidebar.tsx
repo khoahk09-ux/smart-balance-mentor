@@ -1,4 +1,4 @@
-import { BookOpen, BarChart3, Target, Calendar, MessageSquare, Settings, Brain, Trophy } from "lucide-react";
+import { BookOpen, BarChart3, Target, Calendar, MessageSquare, Settings, Brain, Trophy, BookMarked } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -14,6 +14,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
     { id: "dashboard", label: t('dashboard'), icon: BarChart3 },
     { id: "scores", label: t('scores'), icon: Target },
     { id: "quiz", label: t('quiz'), icon: Brain },
+    { id: "mistakes", label: "Ôn tập lỗi sai", icon: BookMarked },
     { id: "schedule", label: t('schedule'), icon: Calendar },
     { id: "achievements", label: t('achievements'), icon: Trophy },
     { id: "ai-tutor", label: t('aiChat'), icon: MessageSquare },

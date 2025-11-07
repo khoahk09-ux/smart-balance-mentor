@@ -144,14 +144,37 @@ const QuizTest = () => {
     if (!quiz || !user) return;
 
     let score = 0;
+    const mistakes = [];
+    
     selectedAnswers.forEach((answer, idx) => {
       const q = quiz.questions[idx];
+      let isCorrect = false;
+      
       if (q.type === "short_answer") {
         const userAnswer = (answer as string || "").trim().toLowerCase();
         const correctAnswer = (q.correctAnswer as string || "").trim().toLowerCase();
-        if (userAnswer === correctAnswer) score++;
-      } else if (answer === q.correctAnswer) {
-        score++;
+        isCorrect = userAnswer === correctAnswer;
+        if (isCorrect) score++;
+      } else {
+        isCorrect = answer === q.correctAnswer;
+        if (isCorrect) score++;
+      }
+
+      // Collect mistakes
+      if (!isCorrect) {
+        mistakes.push({
+          question_text: q.question,
+          question_type: q.type,
+          user_answer: q.type === "short_answer" ? (answer as string || null) : 
+                       q.type === "true_false" ? (answer as string || null) :
+                       q.options?.[answer as number] || null,
+          correct_answer: q.type === "short_answer" || q.type === "true_false" ? 
+                         (q.correctAnswer as string) : 
+                         q.options?.[q.correctAnswer as number] || "",
+          explanation: q.explanation,
+          subject,
+          grade
+        });
       }
     });
 
@@ -165,12 +188,31 @@ const QuizTest = () => {
       questions_data: quiz as any
     };
 
-    const { error } = await supabase
+    const { data: resultData, error } = await supabase
       .from('quiz_results')
-      .insert(insertData);
+      .insert(insertData)
+      .select()
+      .single();
 
     if (error) {
       console.error("Error saving quiz result:", error);
+    }
+
+    // Save mistakes to database
+    if (resultData && mistakes.length > 0) {
+      const mistakesData = mistakes.map(m => ({
+        user_id: user.id,
+        quiz_result_id: resultData.id,
+        ...m
+      }));
+
+      const { error: mistakesError } = await supabase
+        .from('quiz_mistakes')
+        .insert(mistakesData);
+
+      if (mistakesError) {
+        console.error("Error saving mistakes:", mistakesError);
+      }
     }
 
     setShowResults(true);

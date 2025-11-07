@@ -38,6 +38,62 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_mistakes: {
+        Row: {
+          correct_answer: string
+          created_at: string | null
+          explanation: string
+          grade: string
+          id: string
+          is_reviewed: boolean | null
+          question_text: string
+          question_type: string
+          quiz_result_id: string | null
+          reviewed_at: string | null
+          subject: string
+          user_answer: string | null
+          user_id: string
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string | null
+          explanation: string
+          grade: string
+          id?: string
+          is_reviewed?: boolean | null
+          question_text: string
+          question_type: string
+          quiz_result_id?: string | null
+          reviewed_at?: string | null
+          subject: string
+          user_answer?: string | null
+          user_id: string
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string | null
+          explanation?: string
+          grade?: string
+          id?: string
+          is_reviewed?: boolean | null
+          question_text?: string
+          question_type?: string
+          quiz_result_id?: string | null
+          reviewed_at?: string | null
+          subject?: string
+          user_answer?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_mistakes_quiz_result_id_fkey"
+            columns: ["quiz_result_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quiz_results: {
         Row: {
           completed_at: string
