@@ -16,6 +16,23 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
 
+interface ExtraClass {
+  day: string;
+  session: string;
+  time: string;
+  subject: string;
+}
+
+interface ScoresObj {
+  tx1?: number;
+  tx2?: number;
+  tx3?: number;
+  tx4?: number;
+  tx5?: number;
+  gk?: number;
+  ck?: number;
+}
+
 const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -95,18 +112,55 @@ const Dashboard = () => {
         }
       }
 
-      // Load today's schedule
-      const dayOfWeek = new Date().getDay();
+      // Load today's schedule from both school and extra schedules
+      const dayNames = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+      const today = new Date();
+      const todayName = dayNames[today.getDay()];
+      
       const { data: scheduleData } = await supabase
         .from("schedules")
         .select("*")
-        .eq("user_id", user.id)
-        .eq("schedule_type", "weekly");
+        .eq("user_id", user.id);
       
-      if (scheduleData && scheduleData[0]?.schedule_data) {
-        const todayClasses = scheduleData[0].schedule_data[dayOfWeek] || [];
-        setTodaySchedule(todayClasses);
+      let todayClasses: any[] = [];
+      
+      if (scheduleData) {
+        scheduleData.forEach(schedule => {
+          if (schedule.schedule_type === "school") {
+            // Get school schedule for today
+            const schoolData = schedule.schedule_data as Record<string, Record<string, string>>;
+            if (schoolData[todayName]) {
+              Object.entries(schoolData[todayName]).forEach(([period, subject]) => {
+                if (subject && subject.trim()) {
+                  todayClasses.push({
+                    type: "school",
+                    period,
+                    subject,
+                    time: getPeriodTime(period)
+                  });
+                }
+              });
+            }
+          } else if (schedule.schedule_type === "extra") {
+            // Get extra classes for today
+            const extraData = (schedule.schedule_data || []) as unknown as ExtraClass[];
+            if (Array.isArray(extraData)) {
+              extraData.forEach((extraClass: any) => {
+                if (extraClass.day === todayName) {
+                  todayClasses.push({
+                    type: "extra",
+                    subject: extraClass.subject,
+                    time: extraClass.time,
+                    session: extraClass.session
+                  });
+                }
+              });
+            }
+          }
+        });
       }
+      
+      setTodaySchedule(todayClasses);
 
       // Load scores for selected grade and semester
       const { data: scoresData } = await supabase
@@ -119,23 +173,50 @@ const Dashboard = () => {
       if (scoresData) {
         setScores(scoresData);
         
-        // Calculate average score
-        const validScores = scoresData.flatMap(s => {
-          const scoreValues = Object.values(s.scores || {}).filter((v): v is number => typeof v === 'number');
-          return scoreValues;
-        });
-        const avg = validScores.length > 0 
-          ? validScores.reduce((a, b) => a + b, 0) / validScores.length 
+        // Calculate weighted average score properly
+        const subjectAverages = scoresData.map(s => {
+          const scoresObj = (s.scores || {}) as ScoresObj;
+          const tx1 = scoresObj.tx1 || 0;
+          const tx2 = scoresObj.tx2 || 0;
+          const tx3 = scoresObj.tx3 || 0;
+          const tx4 = scoresObj.tx4 || 0;
+          const tx5 = scoresObj.tx5 || 0;
+          const gk = scoresObj.gk || 0;
+          const ck = scoresObj.ck || 0;
+          
+          const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
+          
+          if (hasScores) {
+            const total = tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3);
+            return total / 10;
+          }
+          return 0;
+        }).filter(avg => avg > 0);
+        
+        const avg = subjectAverages.length > 0 
+          ? subjectAverages.reduce((a, b) => a + b, 0) / subjectAverages.length 
           : 0;
-        setAverageScore(avg);
+        setAverageScore(Math.round(avg * 10) / 10); // Round to 1 decimal
 
-        // Find low score subjects (< 6.5)
+        // Find low score subjects (< 6.5) using weighted average
         const lowSubjects = scoresData.filter(s => {
-          const scoreValues = Object.values(s.scores || {}).filter((v): v is number => typeof v === 'number');
-          const subjectAvg = scoreValues.length > 0 
-            ? scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length 
-            : 0;
-          return subjectAvg < 6.5;
+          const scoresObj = (s.scores || {}) as ScoresObj;
+          const tx1 = scoresObj.tx1 || 0;
+          const tx2 = scoresObj.tx2 || 0;
+          const tx3 = scoresObj.tx3 || 0;
+          const tx4 = scoresObj.tx4 || 0;
+          const tx5 = scoresObj.tx5 || 0;
+          const gk = scoresObj.gk || 0;
+          const ck = scoresObj.ck || 0;
+          
+          const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
+          
+          if (hasScores) {
+            const total = tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3);
+            const subjectAvg = total / 10;
+            return subjectAvg < 6.5;
+          }
+          return false;
         });
         setLowScoreSubjects(lowSubjects);
       }
@@ -146,6 +227,23 @@ const Dashboard = () => {
     
     loadData();
   }, [user, selectedGrade, selectedSemester]);
+
+  // Helper function to get period time
+  const getPeriodTime = (period: string): string => {
+    const periodTimes: Record<string, string> = {
+      "Tiết 1": "7:00 - 7:45",
+      "Tiết 2": "7:50 - 8:35",
+      "Tiết 3": "8:50 - 9:35",
+      "Tiết 4": "9:40 - 10:25",
+      "Tiết 5": "10:30 - 11:15",
+      "Tiết 6": "12:45 - 13:30",
+      "Tiết 7": "13:35 - 14:20",
+      "Tiết 8": "14:35 - 15:20",
+      "Tiết 9": "15:25 - 16:10",
+      "Tiết 10": "16:15 - 17:00"
+    };
+    return periodTimes[period] || "";
+  };
 
   const handleCheckIn = async () => {
     if (!user || !canCheckIn) return;
@@ -339,18 +437,24 @@ const Dashboard = () => {
               <Calendar className="w-6 h-6 text-primary" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">{t('todaySchedule')}</p>
-          <div className="mt-3 space-y-2">
+          <p className="text-sm text-muted-foreground mb-1">Lịch học hôm nay</p>
+          <p className="text-3xl font-bold mb-2">{todaySchedule.length}</p>
+          <div className="mt-3 space-y-2 max-h-32 overflow-y-auto">
             {todaySchedule.length > 0 ? (
-              todaySchedule.slice(0, 2).map((item: any, idx: number) => (
-                <div key={idx} className="flex items-center gap-2 text-sm">
-                  <div className="w-2 h-2 rounded-full bg-primary"></div>
-                  <span className="font-medium">{item.subject}</span>
-                  {item.time && <span className="text-muted-foreground">- {item.time}</span>}
+              todaySchedule.map((item: any, idx: number) => (
+                <div key={idx} className="flex items-start gap-2 text-sm border-l-2 border-primary/30 pl-2 py-1">
+                  <div className="flex flex-col flex-1">
+                    <span className="font-medium text-foreground">{item.subject}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {item.time}
+                      {item.type === "extra" && item.session && ` • ${item.session}`}
+                      {item.type === "school" && item.period && ` • ${item.period}`}
+                    </span>
+                  </div>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">{t('noScheduleToday')}</p>
+              <p className="text-sm text-muted-foreground">Không có lịch học hôm nay</p>
             )}
           </div>
         </Card>
@@ -361,17 +465,31 @@ const Dashboard = () => {
               <AlertCircle className="w-6 h-6 text-destructive" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">{t('lowScoreSubjects')}</p>
+          <p className="text-sm text-muted-foreground mb-1">Môn điểm thấp</p>
+          <p className="text-3xl font-bold mb-2">{lowScoreSubjects.length}</p>
           <div className="mt-3 space-y-2">
             {lowScoreSubjects.length > 0 ? (
-              lowScoreSubjects.slice(0, 2).map((item: any, idx: number) => (
-                <div key={idx} className="flex items-center gap-2 text-sm">
-                  <div className="w-2 h-2 rounded-full bg-destructive"></div>
-                  <span className="font-medium">{item.subject}</span>
-                </div>
-              ))
+              lowScoreSubjects.slice(0, 2).map((item: any, idx: number) => {
+                const scoresObj = (item.scores || {}) as ScoresObj;
+                const tx1 = scoresObj.tx1 || 0;
+                const tx2 = scoresObj.tx2 || 0;
+                const tx3 = scoresObj.tx3 || 0;
+                const tx4 = scoresObj.tx4 || 0;
+                const tx5 = scoresObj.tx5 || 0;
+                const gk = scoresObj.gk || 0;
+                const ck = scoresObj.ck || 0;
+                const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
+                const subjectAvg = hasScores ? ((tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3)) / 10) : 0;
+                
+                return (
+                  <div key={idx} className="flex items-center justify-between text-sm border-l-2 border-destructive/30 pl-2 py-1">
+                    <span className="font-medium">{item.subject}</span>
+                    <span className="text-destructive font-semibold">{subjectAvg.toFixed(1)}</span>
+                  </div>
+                );
+              })
             ) : (
-              <p className="text-sm text-success">{t('allSubjectsGood')}</p>
+              <p className="text-sm text-success font-medium">Tất cả môn đều tốt!</p>
             )}
           </div>
         </Card>
@@ -382,21 +500,22 @@ const Dashboard = () => {
               <Trophy className="w-6 h-6 text-warning" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">{t('achievementsEarned')}</p>
+          <p className="text-sm text-muted-foreground mb-1">Thành tích đạt được</p>
           <p className="text-3xl font-bold">{achievementsCount}</p>
+          <p className="text-xs text-muted-foreground mt-2">Tổng số huy hiệu</p>
         </Card>
 
-        {/* My Progress with Mood */}
+        {/* Average Score with Mood */}
         <Card className="p-6 hover:shadow-lg transition-shadow">
           <div className="flex flex-col items-center justify-center h-full">
-            <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-3 ${
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
               moodData.color === "text-success" ? "bg-success/10" :
               moodData.color === "text-warning" ? "bg-warning/10" : "bg-destructive/10"
             }`}>
-              <MoodIcon className={`w-12 h-12 ${moodData.color}`} />
+              <MoodIcon className={`w-10 h-10 ${moodData.color}`} />
             </div>
-            <p className="text-sm text-muted-foreground mb-1">{t('averageScore')}</p>
-            <p className="text-3xl font-bold mb-2">{averageScore > 0 ? averageScore.toFixed(1) : '--'}</p>
+            <p className="text-sm text-muted-foreground mb-1">Điểm trung bình</p>
+            <p className="text-4xl font-bold mb-2">{averageScore > 0 ? averageScore.toFixed(1) : '0.0'}</p>
             <p className={`text-center font-medium text-sm ${moodData.color}`}>
               {moodData.message}
             </p>
@@ -410,16 +529,22 @@ const Dashboard = () => {
       {/* Subjects Need More Study */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold">{t('subjectsNeedImprovement')}</h3>
+          <h3 className="text-lg font-semibold">Môn cần học nhiều hơn</h3>
         </div>
 
         <div className="space-y-4">
           {lowScoreSubjects.length > 0 ? (
             lowScoreSubjects.map((subject, index) => {
-              const scoreValues = Object.values(subject.scores || {}).filter((v): v is number => typeof v === 'number');
-              const avg = scoreValues.length > 0 
-                ? scoreValues.reduce((a, b) => a + b, 0) / scoreValues.length 
-                : 0;
+              const scoresObj = (subject.scores || {}) as ScoresObj;
+              const tx1 = scoresObj.tx1 || 0;
+              const tx2 = scoresObj.tx2 || 0;
+              const tx3 = scoresObj.tx3 || 0;
+              const tx4 = scoresObj.tx4 || 0;
+              const tx5 = scoresObj.tx5 || 0;
+              const gk = scoresObj.gk || 0;
+              const ck = scoresObj.ck || 0;
+              const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
+              const avg = hasScores ? ((tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3)) / 10) : 0;
               
               return (
                 <div key={index} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5 hover:bg-destructive/10 transition-colors">
@@ -429,12 +554,12 @@ const Dashboard = () => {
                     </div>
                   <div>
                     <h4 className="font-semibold">{subject.subject}</h4>
-                    <p className="text-sm text-muted-foreground">{t('averageScore')}: {avg.toFixed(1)}</p>
+                    <p className="text-sm text-muted-foreground">Điểm trung bình: {avg.toFixed(1)}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-destructive">{t('needToStudyMore')}</p>
-                  <p className="text-xs text-muted-foreground">{t('class')} {subject.grade} - {t('semester')} {subject.semester}</p>
+                  <p className="text-sm font-medium text-destructive">Cần ôn tập thêm</p>
+                  <p className="text-xs text-muted-foreground">Lớp {subject.grade} - HK {subject.semester}</p>
                 </div>
                 </div>
               );
@@ -442,8 +567,8 @@ const Dashboard = () => {
           ) : (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <CheckCircle2 className="w-16 h-16 text-success mb-4" />
-              <p className="text-lg font-semibold text-success">{t('excellent')}</p>
-              <p className="text-sm text-muted-foreground mt-2">{t('keepItUp')}</p>
+              <p className="text-lg font-semibold text-success">Xuất sắc! Tất cả các môn đều tốt</p>
+              <p className="text-sm text-muted-foreground mt-2">Bạn đang học tập rất tốt, hãy tiếp tục phát huy!</p>
             </div>
           )}
         </div>
