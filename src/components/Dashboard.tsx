@@ -60,12 +60,15 @@ const Dashboard = () => {
     const loadData = async () => {
       if (!user) return;
       
-      // Load achievements
-      const { data: achievementsData } = await supabase
-        .from("user_achievements")
+      // Load achievements from new achievements table
+      const { data: achievementsData, error: achievementsError } = await supabase
+        .from("achievements")
         .select("*")
-        .eq("user_id", user.id)
-        .eq("is_unlocked", true);
+        .eq("user_id", user.id);
+      
+      if (achievementsError) {
+        console.error('Error loading achievements:', achievementsError);
+      }
       setAchievementsCount(achievementsData?.length || 0);
 
       // Load or initialize streak data
@@ -118,113 +121,77 @@ const Dashboard = () => {
         }
       }
 
-      // Load today's schedule from both school and extra schedules
-      const dayNames = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+      // Load today's schedule from new schedule table
       const today = new Date();
-      const todayName = dayNames[today.getDay()];
+      const todayStr = today.toISOString().split('T')[0];
       
-      const { data: scheduleData } = await supabase
-        .from("schedules")
+      const { data: scheduleData, error: scheduleError } = await supabase
+        .from("schedule")
         .select("*")
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .eq("date", todayStr)
+        .order("created_at", { ascending: true });
+      
+      if (scheduleError) {
+        console.error('Error loading schedule:', scheduleError);
+      }
       
       let todayClasses: any[] = [];
       
-      if (scheduleData) {
-        scheduleData.forEach(schedule => {
-          if (schedule.schedule_type === "school") {
-            // Get school schedule for today
-            const schoolData = schedule.schedule_data as Record<string, Record<string, string>>;
-            if (schoolData[todayName]) {
-              Object.entries(schoolData[todayName]).forEach(([period, subject]) => {
-                if (subject && subject.trim()) {
-                  todayClasses.push({
-                    type: "school",
-                    period,
-                    subject,
-                    time: getPeriodTime(period)
-                  });
-                }
-              });
-            }
-          } else if (schedule.schedule_type === "extra") {
-            // Get extra classes for today
-            const extraData = (schedule.schedule_data || []) as unknown as ExtraClass[];
-            if (Array.isArray(extraData)) {
-              extraData.forEach((extraClass: any) => {
-                if (extraClass.day === todayName) {
-                  todayClasses.push({
-                    type: "extra",
-                    subject: extraClass.subject,
-                    time: extraClass.time,
-                    session: extraClass.session
-                  });
-                }
-              });
-            }
-          }
-        });
+      if (scheduleData && scheduleData.length > 0) {
+        todayClasses = scheduleData.map(item => ({
+          type: "schedule",
+          subject: item.subject,
+          time: item.task,
+          period: item.subject
+        }));
       }
       
       setTodaySchedule(todayClasses);
 
-      // Load scores for selected grade and semester
-      const { data: scoresData } = await supabase
-        .from("user_scores")
+      // Load grades from new grades table
+      const { data: gradesData, error: gradesError } = await supabase
+        .from("grades")
         .select("*")
-        .eq("user_id", user.id)
-        .eq("grade", selectedGrade)
-        .eq("semester", selectedSemester);
+        .eq("user_id", user.id);
       
-      if (scoresData) {
-        setScores(scoresData);
-        
-        // Calculate weighted average score properly
-        const subjectAverages = scoresData.map(s => {
-          const scoresObj = (s.scores || {}) as ScoresObj;
-          const tx1 = scoresObj.tx1 || 0;
-          const tx2 = scoresObj.tx2 || 0;
-          const tx3 = scoresObj.tx3 || 0;
-          const tx4 = scoresObj.tx4 || 0;
-          const tx5 = scoresObj.tx5 || 0;
-          const gk = scoresObj.gk || 0;
-          const ck = scoresObj.ck || 0;
-          
-          const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
-          
-          if (hasScores) {
-            const total = tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3);
-            return total / 10;
+      if (gradesError) {
+        console.error('Error loading grades:', gradesError);
+      }
+      
+      if (gradesData && gradesData.length > 0) {
+        // Convert to old format for compatibility with existing display logic
+        const convertedScores = gradesData.map(grade => ({
+          subject: grade.subject,
+          grade: selectedGrade,
+          semester: selectedSemester,
+          scores: {
+            tx1: Number(grade.score),
+            tx2: null,
+            tx3: null,
+            tx4: null,
+            tx5: null,
+            gk: null,
+            ck: null
           }
-          return 0;
-        }).filter(avg => avg > 0);
+        }));
         
-        const avg = subjectAverages.length > 0 
-          ? subjectAverages.reduce((a, b) => a + b, 0) / subjectAverages.length 
-          : 0;
-        setAverageScore(Math.round(avg * 10) / 10); // Round to 1 decimal
+        setScores(convertedScores);
+        
+        // Calculate average score
+        const total = gradesData.reduce((sum, grade) => sum + Number(grade.score), 0);
+        const avg = total / gradesData.length;
+        setAverageScore(Math.round(avg * 10) / 10);
 
-        // Find low score subjects (< 6.5) using weighted average
-        const lowSubjects = scoresData.filter(s => {
-          const scoresObj = (s.scores || {}) as ScoresObj;
-          const tx1 = scoresObj.tx1 || 0;
-          const tx2 = scoresObj.tx2 || 0;
-          const tx3 = scoresObj.tx3 || 0;
-          const tx4 = scoresObj.tx4 || 0;
-          const tx5 = scoresObj.tx5 || 0;
-          const gk = scoresObj.gk || 0;
-          const ck = scoresObj.ck || 0;
-          
-          const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
-          
-          if (hasScores) {
-            const total = tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3);
-            const subjectAvg = total / 10;
-            return subjectAvg < 6.5;
-          }
-          return false;
+        // Find low score subjects (< 6.5)
+        const lowSubjects = convertedScores.filter((_, index) => {
+          return Number(gradesData[index].score) < 6.5;
         });
         setLowScoreSubjects(lowSubjects);
+      } else {
+        setScores([]);
+        setAverageScore(0);
+        setLowScoreSubjects([]);
       }
 
       // Calculate access frequency (số lần truy cập trong 7 ngày qua)
@@ -519,7 +486,7 @@ const Dashboard = () => {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">Không có lịch học hôm nay</p>
+              <p className="text-sm text-muted-foreground">Chưa có dữ liệu</p>
             )}
           </div>
         </Card>
@@ -554,7 +521,7 @@ const Dashboard = () => {
                 );
               })
             ) : (
-              <p className="text-sm text-success font-semibold">Tất cả môn đều tốt!</p>
+              <p className="text-sm text-muted-foreground">Chưa có dữ liệu</p>
             )}
           </div>
         </Card>
@@ -567,7 +534,9 @@ const Dashboard = () => {
           </div>
           <p className="text-sm text-muted-foreground mb-1 font-medium">Thành tích đạt được</p>
           <p className="text-3xl font-extrabold text-foreground">{achievementsCount}</p>
-          <p className="text-xs text-muted-foreground mt-2 font-medium">Tổng số huy hiệu</p>
+          <p className="text-xs text-muted-foreground mt-2 font-medium">
+            {achievementsCount > 0 ? "Tổng số huy hiệu" : "Chưa có dữ liệu"}
+          </p>
         </Card>
 
         {/* Average Score with Mood */}
@@ -631,11 +600,7 @@ const Dashboard = () => {
             })
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-success/20 to-success/40 flex items-center justify-center mb-4 shadow-lg">
-                <CheckCircle2 className="w-12 h-12 text-success" />
-              </div>
-              <p className="text-2xl font-bold text-success mb-2">Xuất sắc! Tất cả các môn đều tốt</p>
-              <p className="text-sm text-muted-foreground font-medium">Bạn đang học tập rất tốt, hãy tiếp tục phát huy!</p>
+              <p className="text-lg text-muted-foreground font-medium">Chưa có dữ liệu</p>
             </div>
           )}
         </div>

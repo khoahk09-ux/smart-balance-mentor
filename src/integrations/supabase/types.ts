@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          time: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          time?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          time?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_review_stats: {
         Row: {
           created_at: string
@@ -40,6 +67,30 @@ export type Database = {
           mistakes_reviewed?: number
           review_date?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      grades: {
+        Row: {
+          created_at: string
+          id: string
+          score: number
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          score: number
+          subject: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          score?: number
+          subject?: string
           user_id?: string
         }
         Relationships: []
@@ -209,6 +260,33 @@ export type Database = {
           score?: number
           subject?: string
           total_questions?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      schedule: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          subject: string
+          task: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          subject: string
+          task: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          subject?: string
+          task?: string
           user_id?: string
         }
         Relationships: []
