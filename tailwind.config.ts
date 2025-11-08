@@ -66,11 +66,28 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Tet Theme specific colors
+        mai: {
+          DEFAULT: "hsl(45 100% 65%)",
+          light: "hsl(45 100% 75%)",
+          dark: "hsl(42 100% 55%)",
+        },
+        tet: {
+          red: "hsl(4 75% 58%)",
+          "red-light": "hsl(9 100% 68%)",
+          cream: "hsl(45 100% 95%)",
+          border: "hsl(45 80% 88%)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        tet: "1.25rem",
+      },
+      boxShadow: {
+        'tet-card': '0 6px 18px rgba(0, 0, 0, 0.07)',
+        'tet-hover': '0 8px 24px rgba(0, 0, 0, 0.1)',
       },
       keyframes: {
         "accordion-down": {

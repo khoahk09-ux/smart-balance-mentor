@@ -8,27 +8,28 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 25% 97%;
-    --foreground: 235 20% 15%;
+    /* Tet Theme - Mai Flower Colors */
+    --background: 45 100% 95%;
+    --foreground: 25 35% 25%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 235 20% 15%;
+    --card: 45 100% 98%;
+    --card-foreground: 25 35% 25%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 235 20% 15%;
+    --popover: 45 100% 98%;
+    --popover-foreground: 25 35% 25%;
 
-    --primary: 245 60% 58%;
+    --primary: 4 75% 58%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 250 70% 70%;
+    --primary-glow: 9 100% 68%;
 
-    --secondary: 210 100% 92%;
-    --secondary-foreground: 235 20% 15%;
+    --secondary: 45 100% 85%;
+    --secondary-foreground: 25 35% 25%;
 
-    --muted: 220 20% 92%;
-    --muted-foreground: 235 10% 50%;
+    --muted: 45 60% 92%;
+    --muted-foreground: 25 20% 50%;
 
-    --accent: 280 65% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 100% 65%;
+    --accent-foreground: 25 35% 25%;
 
     --success: 142 76% 45%;
     --success-foreground: 0 0% 100%;
@@ -39,65 +40,63 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 88%;
-    --input: 220 20% 90%;
-    --ring: 245 60% 58%;
+    --border: 45 80% 88%;
+    --input: 45 60% 90%;
+    --ring: 4 75% 58%;
 
-    --radius: 0.75rem;
+    --radius: 1.25rem;
 
-    --gradient-primary: linear-gradient(135deg, hsl(245 60% 58%), hsl(280 65% 60%));
+    /* Tet Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(4 75% 58%), hsl(9 100% 68%));
+    --gradient-mai: linear-gradient(135deg, hsl(45 100% 65%), hsl(42 100% 72%));
     --gradient-success: linear-gradient(135deg, hsl(142 76% 45%), hsl(160 70% 50%));
     --gradient-warning: linear-gradient(135deg, hsl(35 92% 55%), hsl(45 90% 60%));
     
-    --shadow-sm: 0 2px 8px hsl(245 60% 58% / 0.08);
-    --shadow-md: 0 4px 16px hsl(245 60% 58% / 0.12);
-    --shadow-lg: 0 8px 24px hsl(245 60% 58% / 0.16);
-    --shadow-glow: 0 0 30px hsl(245 60% 58% / 0.3);
+    /* Tet Shadows */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.07);
+    --shadow-glow: 0 0 30px hsl(45 100% 65% / 0.3);
+    --shadow-card: 0 6px 18px rgba(0, 0, 0, 0.07);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    --radius: 0.75rem;
+    --radius: 1.25rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 45 100% 98%;
+    --sidebar-foreground: 25 35% 25%;
+    --sidebar-primary: 4 75% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 45 100% 92%;
+    --sidebar-accent-foreground: 25 35% 25%;
+    --sidebar-border: 45 80% 88%;
+    --sidebar-ring: 4 75% 58%;
   }
 
   .dark {
-    --background: 235 25% 8%;
-    --foreground: 220 20% 95%;
+    /* Dark Tet Theme */
+    --background: 25 25% 8%;
+    --foreground: 45 40% 95%;
 
-    --card: 235 20% 12%;
-    --card-foreground: 220 20% 95%;
+    --card: 25 20% 12%;
+    --card-foreground: 45 40% 95%;
 
-    --popover: 235 20% 12%;
-    --popover-foreground: 220 20% 95%;
+    --popover: 25 20% 12%;
+    --popover-foreground: 45 40% 95%;
 
-    --primary: 250 70% 65%;
+    --primary: 4 80% 65%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 260 75% 75%;
+    --primary-glow: 9 100% 72%;
 
-    --secondary: 235 18% 18%;
-    --secondary-foreground: 220 20% 95%;
+    --secondary: 25 18% 18%;
+    --secondary-foreground: 45 40% 95%;
 
-    --muted: 235 15% 20%;
-    --muted-foreground: 220 10% 60%;
+    --muted: 25 15% 20%;
+    --muted-foreground: 45 20% 60%;
 
-    --accent: 285 70% 65%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 90% 60%;
+    --accent-foreground: 25 25% 8%;
 
     --success: 142 76% 50%;
     --success-foreground: 0 0% 100%;
@@ -108,27 +107,29 @@ All colors MUST be HSL.
     --destructive: 0 84% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 235 15% 22%;
-    --input: 235 15% 20%;
-    --ring: 250 70% 65%;
+    --border: 25 15% 22%;
+    --input: 25 15% 20%;
+    --ring: 4 80% 65%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(250 70% 65%), hsl(285 70% 65%));
+    --gradient-primary: linear-gradient(135deg, hsl(4 80% 65%), hsl(9 100% 72%));
+    --gradient-mai: linear-gradient(135deg, hsl(45 90% 60%), hsl(42 100% 68%));
     --gradient-success: linear-gradient(135deg, hsl(142 76% 50%), hsl(160 70% 55%));
     --gradient-warning: linear-gradient(135deg, hsl(35 92% 60%), hsl(45 90% 65%));
     
     --shadow-sm: 0 2px 8px hsl(0 0% 0% / 0.3);
     --shadow-md: 0 4px 16px hsl(0 0% 0% / 0.4);
-    --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.5);
-    --shadow-glow: 0 0 30px hsl(250 70% 65% / 0.4);
+    --shadow-lg: 0 6px 18px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 30px hsl(45 90% 60% / 0.4);
+    --shadow-card: 0 8px 24px hsl(0 0% 0% / 0.5);
 
-    --sidebar-background: 235 20% 12%;
-    --sidebar-foreground: 220 20% 95%;
-    --sidebar-primary: 250 70% 65%;
+    --sidebar-background: 25 20% 12%;
+    --sidebar-foreground: 45 40% 95%;
+    --sidebar-primary: 4 80% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 235 15% 20%;
-    --sidebar-accent-foreground: 220 20% 95%;
-    --sidebar-border: 235 15% 22%;
-    --sidebar-ring: 250 70% 65%;
+    --sidebar-accent: 25 15% 20%;
+    --sidebar-accent-foreground: 45 40% 95%;
+    --sidebar-border: 25 15% 22%;
+    --sidebar-ring: 4 80% 65%;
   }
 }
 
@@ -139,5 +140,43 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
+  
+  .font-script {
+    font-family: 'Dancing Script', cursive;
+  }
+}
+
+/* Falling Mai Flowers Animation */
+@keyframes fall {
+  0% { 
+    transform: translateY(0) rotate(0deg);
+    opacity: 0.5;
+  }
+  100% { 
+    transform: translateY(120vh) rotate(360deg);
+    opacity: 0.3;
+  }
+}
+
+.falling-flower {
+  position: fixed;
+  top: -50px;
+  width: 26px;
+  height: 26px;
+  pointer-events: none;
+  opacity: 0.5;
+  animation: fall linear infinite;
+  z-index: 1;
+}
+
+/* Hover effects for cards */
+.card-tet-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-tet-hover:hover {
+  transform: scale(1.04);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }

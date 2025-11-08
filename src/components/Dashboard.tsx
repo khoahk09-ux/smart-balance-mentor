@@ -17,6 +17,8 @@ import { useToast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
 import { useNotifications } from "@/hooks/useNotifications";
 import { differenceInMinutes, parse } from "date-fns";
+import { FallingFlowers } from "@/components/FallingFlowers";
+import maiBranch from "@/assets/mai-branch.png";
 
 interface ExtraClass {
   day: string;
@@ -427,21 +429,32 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Welcome Banner */}
-      <Card className="p-8 bg-gradient-to-r from-primary via-primary/90 to-accent border-none overflow-hidden relative">
+      {/* Falling Mai Flowers */}
+      <FallingFlowers />
+      
+      {/* Welcome Banner - Tet Theme */}
+      <Card className="p-8 bg-gradient-to-r from-tet-red via-primary to-tet-red-light border-none overflow-hidden relative">
+        {/* Mai Branch Decoration */}
+        <img 
+          src={maiBranch} 
+          alt="" 
+          className="absolute top-0 right-0 h-full w-auto opacity-20 pointer-events-none"
+          style={{ filter: 'brightness(1.2)' }}
+        />
+        
         <div className="flex items-center justify-between relative z-10">
           <div className="flex-1">
-            <h2 className="text-3xl font-bold text-primary-foreground mb-2">
-              {t('welcomeBack')}, {displayName}!
+            <h2 className="text-4xl font-extrabold text-white mb-2">
+              Mùa Xuân rực rỡ – Học tập thăng hoa!
             </h2>
-            <p className="text-primary-foreground/90 mb-6">
-              {t('welcomeMessage')}
+            <p className="text-xl font-script text-white/95 mb-6">
+              Cố gắng hôm nay để mai nở hoa thành công
             </p>
             <div className="flex gap-2">
               <Button 
                 onClick={handleCheckIn}
                 disabled={!canCheckIn}
-                className="bg-white text-primary hover:bg-white/90 disabled:opacity-50"
+                className="bg-mai text-foreground hover:bg-mai-dark font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
               >
                 <Check className="w-5 h-5 mr-2" />
                 {canCheckIn ? t('checkInToday') : t('checkedIn')}
@@ -450,7 +463,7 @@ const Dashboard = () => {
                 <Button 
                   onClick={handleRecoverStreak}
                   variant="outline"
-                  className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                  className="bg-white/10 text-white border-white/20 hover:bg-white/20 backdrop-blur-sm"
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
                   {t('recover')} ({recoveryCount})
@@ -460,7 +473,7 @@ const Dashboard = () => {
                 <Button 
                   onClick={requestPermission}
                   variant="outline"
-                  className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                  className="bg-white/10 text-white border-white/20 hover:bg-white/20 backdrop-blur-sm"
                 >
                   <Bell className="w-4 h-4 mr-2" />
                   Bật thông báo
@@ -468,35 +481,35 @@ const Dashboard = () => {
               )}
             </div>
           </div>
-          <div className="flex flex-col items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
+          <div className="flex flex-col items-center gap-3 bg-white/15 backdrop-blur-md rounded-2xl px-8 py-6 border border-white/30 shadow-xl">
             <div className="flex items-center gap-3">
-              <Flame className="w-8 h-8 text-orange-400" />
+              <Flame className="w-10 h-10 text-mai" />
               <div>
-                <p className="text-sm text-primary-foreground/80">{t('streak')}</p>
-                <p className="text-3xl font-bold text-primary-foreground">{streak} {t('days')}</p>
+                <p className="text-sm text-white/80 font-medium">{t('streak')}</p>
+                <p className="text-4xl font-extrabold text-white">{streak} {t('days')}</p>
               </div>
             </div>
-            <p className="text-xs text-primary-foreground/60">{t('recoveryLeft')}: {recoveryCount}/3</p>
+            <p className="text-xs text-white/70 font-medium">{t('recoveryLeft')}: {recoveryCount}/3</p>
           </div>
         </div>
       </Card>
 
-      {/* Stats Cards and Progress */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6 hover:shadow-lg transition-shadow">
+        <Card className="p-6">
           <div className="flex items-start justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-primary" />
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-mai-light to-mai flex items-center justify-center shadow-md">
+              <Calendar className="w-7 h-7 text-foreground" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Lịch học hôm nay</p>
-          <p className="text-3xl font-bold mb-2">{todaySchedule.length}</p>
+          <p className="text-sm text-muted-foreground mb-1 font-medium">Lịch học hôm nay</p>
+          <p className="text-3xl font-extrabold mb-2 text-foreground">{todaySchedule.length}</p>
           <div className="mt-3 space-y-2 max-h-32 overflow-y-auto">
             {todaySchedule.length > 0 ? (
               todaySchedule.map((item: any, idx: number) => (
-                <div key={idx} className="flex items-start gap-2 text-sm border-l-2 border-primary/30 pl-2 py-1">
+                <div key={idx} className="flex items-start gap-2 text-sm border-l-2 border-mai pl-3 py-1">
                   <div className="flex flex-col flex-1">
-                    <span className="font-medium text-foreground">{item.subject}</span>
+                    <span className="font-semibold text-foreground">{item.subject}</span>
                     <span className="text-xs text-muted-foreground">
                       {item.time}
                       {item.type === "extra" && item.session && ` • ${item.session}`}
@@ -511,14 +524,14 @@ const Dashboard = () => {
           </div>
         </Card>
 
-        <Card className="p-6 hover:shadow-lg transition-shadow">
+        <Card className="p-6">
           <div className="flex items-start justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
-              <AlertCircle className="w-6 h-6 text-destructive" />
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-destructive/20 to-destructive/40 flex items-center justify-center shadow-md">
+              <AlertCircle className="w-7 h-7 text-destructive" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Môn điểm thấp</p>
-          <p className="text-3xl font-bold mb-2">{lowScoreSubjects.length}</p>
+          <p className="text-sm text-muted-foreground mb-1 font-medium">Môn điểm thấp</p>
+          <p className="text-3xl font-extrabold mb-2 text-foreground">{lowScoreSubjects.length}</p>
           <div className="mt-3 space-y-2">
             {lowScoreSubjects.length > 0 ? (
               lowScoreSubjects.slice(0, 2).map((item: any, idx: number) => {
@@ -534,41 +547,41 @@ const Dashboard = () => {
                 const subjectAvg = hasScores ? ((tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3)) / 10) : 0;
                 
                 return (
-                  <div key={idx} className="flex items-center justify-between text-sm border-l-2 border-destructive/30 pl-2 py-1">
-                    <span className="font-medium">{item.subject}</span>
-                    <span className="text-destructive font-semibold">{subjectAvg.toFixed(1)}</span>
+                  <div key={idx} className="flex items-center justify-between text-sm border-l-2 border-destructive/40 pl-3 py-1">
+                    <span className="font-semibold">{item.subject}</span>
+                    <span className="text-destructive font-bold">{subjectAvg.toFixed(1)}</span>
                   </div>
                 );
               })
             ) : (
-              <p className="text-sm text-success font-medium">Tất cả môn đều tốt!</p>
+              <p className="text-sm text-success font-semibold">Tất cả môn đều tốt!</p>
             )}
           </div>
         </Card>
 
-        <Card className="p-6 hover:shadow-lg transition-shadow">
+        <Card className="p-6">
           <div className="flex items-start justify-between mb-4">
-            <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
-              <Trophy className="w-6 h-6 text-warning" />
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-warning/30 to-warning/50 flex items-center justify-center shadow-md">
+              <Trophy className="w-7 h-7 text-warning" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Thành tích đạt được</p>
-          <p className="text-3xl font-bold">{achievementsCount}</p>
-          <p className="text-xs text-muted-foreground mt-2">Tổng số huy hiệu</p>
+          <p className="text-sm text-muted-foreground mb-1 font-medium">Thành tích đạt được</p>
+          <p className="text-3xl font-extrabold text-foreground">{achievementsCount}</p>
+          <p className="text-xs text-muted-foreground mt-2 font-medium">Tổng số huy hiệu</p>
         </Card>
 
         {/* Average Score with Mood */}
-        <Card className="p-6 hover:shadow-lg transition-shadow">
+        <Card className="p-6">
           <div className="flex flex-col items-center justify-center h-full">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${
-              moodData.color === "text-success" ? "bg-success/10" :
-              moodData.color === "text-warning" ? "bg-warning/10" : "bg-destructive/10"
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg ${
+              moodData.color === "text-success" ? "bg-gradient-to-br from-success/20 to-success/40" :
+              moodData.color === "text-warning" ? "bg-gradient-to-br from-warning/20 to-warning/40" : "bg-gradient-to-br from-destructive/20 to-destructive/40"
             }`}>
               <MoodIcon className={`w-10 h-10 ${moodData.color}`} />
             </div>
-            <p className="text-sm text-muted-foreground mb-1">Điểm trung bình</p>
-            <p className="text-4xl font-bold mb-2">{averageScore > 0 ? averageScore.toFixed(1) : '0.0'}</p>
-            <p className={`text-center font-medium text-sm ${moodData.color}`}>
+            <p className="text-sm text-muted-foreground mb-1 font-medium">Điểm trung bình</p>
+            <p className="text-4xl font-extrabold mb-2 text-foreground">{averageScore > 0 ? averageScore.toFixed(1) : '0.0'}</p>
+            <p className={`text-center font-semibold text-sm ${moodData.color}`}>
               {moodData.message}
             </p>
           </div>
@@ -581,7 +594,7 @@ const Dashboard = () => {
       {/* Subjects Need More Study */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold">Môn cần học nhiều hơn</h3>
+          <h3 className="text-xl font-bold">Môn cần học nhiều hơn</h3>
         </div>
 
         <div className="space-y-4">
@@ -599,28 +612,30 @@ const Dashboard = () => {
               const avg = hasScores ? ((tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3)) / 10) : 0;
               
               return (
-                <div key={index} className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5 hover:bg-destructive/10 transition-colors">
+                <div key={index} className="flex items-center justify-between p-4 rounded-xl border-2 border-destructive/30 bg-destructive/5 hover:bg-destructive/10 transition-all hover:shadow-md">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center">
-                      <AlertCircle className="w-5 h-5 text-destructive" />
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-destructive/20 to-destructive/40 flex items-center justify-center shadow-sm">
+                      <AlertCircle className="w-6 h-6 text-destructive" />
                     </div>
                   <div>
-                    <h4 className="font-semibold">{subject.subject}</h4>
-                    <p className="text-sm text-muted-foreground">Điểm trung bình: {avg.toFixed(1)}</p>
+                    <h4 className="font-bold text-lg">{subject.subject}</h4>
+                    <p className="text-sm text-muted-foreground font-medium">Điểm trung bình: {avg.toFixed(1)}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-destructive">Cần ôn tập thêm</p>
-                  <p className="text-xs text-muted-foreground">Lớp {subject.grade} - HK {subject.semester}</p>
+                  <p className="text-sm font-bold text-destructive">Cần ôn tập thêm</p>
+                  <p className="text-xs text-muted-foreground font-medium">Lớp {subject.grade} - HK {subject.semester}</p>
                 </div>
                 </div>
               );
             })
           ) : (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <CheckCircle2 className="w-16 h-16 text-success mb-4" />
-              <p className="text-lg font-semibold text-success">Xuất sắc! Tất cả các môn đều tốt</p>
-              <p className="text-sm text-muted-foreground mt-2">Bạn đang học tập rất tốt, hãy tiếp tục phát huy!</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-success/20 to-success/40 flex items-center justify-center mb-4 shadow-lg">
+                <CheckCircle2 className="w-12 h-12 text-success" />
+              </div>
+              <p className="text-2xl font-bold text-success mb-2">Xuất sắc! Tất cả các môn đều tốt</p>
+              <p className="text-sm text-muted-foreground font-medium">Bạn đang học tập rất tốt, hãy tiếp tục phát huy!</p>
             </div>
           )}
         </div>
