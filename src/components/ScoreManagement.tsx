@@ -5,13 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Target, CheckCircle2, TrendingUp, AlertCircle, Lightbulb, Save, Edit } from "lucide-react";
+import { Target, CheckCircle2, TrendingUp, AlertCircle, Lightbulb, Save, Edit, Bell } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import ScoreChart from "./ScoreChart";
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const SUBJECTS = [
   "Toán", "Lý", "Hóa", "Sinh", "Văn", "Anh", 
@@ -40,12 +41,14 @@ interface UserScoreRecord {
 
 const ScoreManagement = () => {
   const { user } = useAuth();
+  const { permission, requestPermission, notifyScoreDecrease } = useNotifications();
   const [grade, setGrade] = useState("10");
   const [semester, setSemester] = useState("Kỳ 1");
   const [selectedSubject, setSelectedSubject] = useState("Toán");
   const [currentRecord, setCurrentRecord] = useState<UserScoreRecord | null>(null);
   const [targetScore, setTargetScore] = useState<string>("");
   const [allScores, setAllScores] = useState<Record<string, any>>({});
+  const [previousAverage, setPreviousAverage] = useState<number | null>(null);
 
   // Load scores from database
   const loadScores = async () => {
@@ -113,6 +116,8 @@ const ScoreManagement = () => {
     if (!user) return;
 
     const numValue = value === "" ? null : parseFloat(value);
+    const oldAverage = currentRecord ? calculateAverage(currentRecord.scores) : 0;
+    
     const updatedScores = {
       ...(currentRecord?.scores || {
         tx1: null, tx2: null, tx3: null, tx4: null, tx5: null, gk: null, ck: null
@@ -157,6 +162,13 @@ const ScoreManagement = () => {
         target_score: data.target_score,
         is_completed: data.is_completed,
       });
+      
+      // Check for score decrease and notify
+      const newAverage = calculateAverage(data.scores as unknown as ScoreData);
+      if (oldAverage > 0 && newAverage > 0 && newAverage < oldAverage && permission === 'granted') {
+        notifyScoreDecrease(selectedSubject, oldAverage, newAverage);
+      }
+      
       loadAllScores();
     }
   };
@@ -313,7 +325,15 @@ const ScoreManagement = () => {
               Nhập điểm từng cột, đặt mục tiêu và nhận gợi ý để đạt được kết quả mong muốn
             </p>
           </div>
-          <TrendingUp className="w-10 h-10 text-primary" />
+          <div className="flex items-center gap-3">
+            {permission !== 'granted' && (
+              <Button onClick={requestPermission} variant="outline" size="sm" className="gap-2">
+                <Bell className="w-4 h-4" />
+                Bật thông báo
+              </Button>
+            )}
+            <TrendingUp className="w-10 h-10 text-primary" />
+          </div>
         </div>
       </Card>
 

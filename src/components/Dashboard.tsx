@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, ListTodo, Trophy, TrendingUp, Check, Smile, Frown, Angry, Calendar, AlertCircle, Flame, RotateCcw, Meh } from "lucide-react";
+import { CheckCircle2, ListTodo, Trophy, TrendingUp, Check, Smile, Frown, Angry, Calendar, AlertCircle, Flame, RotateCcw, Meh, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
+import { useNotifications } from "@/hooks/useNotifications";
+import { differenceInMinutes, parse } from "date-fns";
 
 interface ExtraClass {
   day: string;
@@ -37,6 +39,7 @@ const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useLanguage();
+  const { permission, requestPermission, notifyUpcomingClass } = useNotifications();
   const [achievementsCount, setAchievementsCount] = useState(0);
   const [streak, setStreak] = useState(0);
   const [recoveryCount, setRecoveryCount] = useState(3);
@@ -49,6 +52,7 @@ const Dashboard = () => {
   const [selectedSemester, setSelectedSemester] = useState("1");
   const [averageScore, setAverageScore] = useState(0);
   const [accessFrequency, setAccessFrequency] = useState(0);
+  const [notifiedClasses, setNotifiedClasses] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const loadData = async () => {
@@ -227,6 +231,44 @@ const Dashboard = () => {
     
     loadData();
   }, [user, selectedGrade, selectedSemester]);
+
+  // Check for upcoming classes every minute
+  useEffect(() => {
+    if (!user || permission !== 'granted') return;
+
+    const checkUpcomingClasses = () => {
+      const now = new Date();
+
+      todaySchedule.forEach((classItem) => {
+        // Parse time from different formats
+        let classTime = "";
+        if (classItem.time && classItem.time.includes("-")) {
+          classTime = classItem.time.split("-")[0].trim();
+        }
+
+        if (!classTime) return;
+
+        // Convert time to Date object
+        const [hours, minutes] = classTime.split(":").map(Number);
+        const classDate = new Date(now);
+        classDate.setHours(hours, minutes, 0, 0);
+        
+        const minutesUntil = differenceInMinutes(classDate, now);
+
+        // Notify 15 minutes before class if not already notified
+        const notificationKey = `${classItem.subject}-${classTime}-${now.toDateString()}`;
+        if (minutesUntil > 0 && minutesUntil <= 15 && !notifiedClasses.has(notificationKey)) {
+          notifyUpcomingClass(classItem.subject, classTime, minutesUntil);
+          setNotifiedClasses(prev => new Set(prev).add(notificationKey));
+        }
+      });
+    };
+
+    checkUpcomingClasses();
+    const interval = setInterval(checkUpcomingClasses, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, [user, permission, todaySchedule, notifiedClasses, notifyUpcomingClass]);
 
   // Helper function to get period time
   const getPeriodTime = (period: string): string => {
@@ -412,6 +454,16 @@ const Dashboard = () => {
                 >
                   <RotateCcw className="w-4 h-4 mr-2" />
                   {t('recover')} ({recoveryCount})
+                </Button>
+              )}
+              {permission !== 'granted' && (
+                <Button 
+                  onClick={requestPermission}
+                  variant="outline"
+                  className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+                >
+                  <Bell className="w-4 h-4 mr-2" />
+                  Bật thông báo
                 </Button>
               )}
             </div>
