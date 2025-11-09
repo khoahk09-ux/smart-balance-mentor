@@ -266,6 +266,7 @@ export type Database = {
       }
       schedule: {
         Row: {
+          completed: boolean | null
           created_at: string
           date: string
           id: string
@@ -274,6 +275,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          completed?: boolean | null
           created_at?: string
           date: string
           id?: string
@@ -282,6 +284,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          completed?: boolean | null
           created_at?: string
           date?: string
           id?: string
@@ -335,6 +338,36 @@ export type Database = {
           created_at?: string
           id?: string
           subject?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_sessions: {
+        Row: {
+          created_at: string | null
+          duration_minutes: number
+          id: string
+          session_date: string
+          subject: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          duration_minutes?: number
+          id?: string
+          session_date?: string
+          subject?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          duration_minutes?: number
+          id?: string
+          session_date?: string
+          subject?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []

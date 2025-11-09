@@ -55,6 +55,9 @@ const Dashboard = () => {
   const [averageScore, setAverageScore] = useState(0);
   const [accessFrequency, setAccessFrequency] = useState(0);
   const [notifiedClasses, setNotifiedClasses] = useState<Set<string>>(new Set());
+  const [studyTimeToday, setStudyTimeToday] = useState(0);
+  const [scheduleProgress, setScheduleProgress] = useState({ completed: 0, total: 0 });
+  const [latestAchievement, setLatestAchievement] = useState<any>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -143,49 +146,93 @@ const Dashboard = () => {
           type: "schedule",
           subject: item.subject,
           time: item.task,
-          period: item.subject
+          period: item.subject,
+          completed: item.completed || false
         }));
+        
+        // Calculate schedule progress
+        const completedCount = scheduleData.filter(item => item.completed).length;
+        setScheduleProgress({ completed: completedCount, total: scheduleData.length });
+      } else {
+        setScheduleProgress({ completed: 0, total: 0 });
       }
       
       setTodaySchedule(todayClasses);
 
-      // Load grades from new grades table
-      const { data: gradesData, error: gradesError } = await supabase
-        .from("grades")
-        .select("*")
-        .eq("user_id", user.id);
+      // Load study time for today
+      const { data: studyData } = await supabase
+        .from("study_sessions")
+        .select("duration_minutes")
+        .eq("user_id", user.id)
+        .eq("session_date", todayStr);
       
-      if (gradesError) {
-        console.error('Error loading grades:', gradesError);
+      const totalMinutes = studyData?.reduce((sum, session) => sum + session.duration_minutes, 0) || 0;
+      setStudyTimeToday(totalMinutes);
+
+      // Load scores from user_scores table
+      const { data: userScoresData, error: scoresError } = await supabase
+        .from("user_scores")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("grade", selectedGrade)
+        .eq("semester", selectedSemester);
+      
+      if (scoresError) {
+        console.error('Error loading scores:', scoresError);
       }
       
-      if (gradesData && gradesData.length > 0) {
-        // Convert to old format for compatibility with existing display logic
-        const convertedScores = gradesData.map(grade => ({
-          subject: grade.subject,
-          grade: selectedGrade,
-          semester: selectedSemester,
-          scores: {
-            tx1: Number(grade.score),
-            tx2: null,
-            tx3: null,
-            tx4: null,
-            tx5: null,
-            gk: null,
-            ck: null
-          }
+      if (userScoresData && userScoresData.length > 0) {
+        const convertedScores = userScoresData.map(record => ({
+          subject: record.subject,
+          grade: record.grade,
+          semester: record.semester,
+          scores: record.scores
         }));
         
         setScores(convertedScores);
         
-        // Calculate average score
-        const total = gradesData.reduce((sum, grade) => sum + Number(grade.score), 0);
-        const avg = total / gradesData.length;
-        setAverageScore(Math.round(avg * 10) / 10);
+        // Calculate average score properly
+        let totalScore = 0;
+        let subjectCount = 0;
+        
+        userScoresData.forEach(record => {
+          const scoresObj = record.scores as any;
+          const tx = [scoresObj.tx1, scoresObj.tx2, scoresObj.tx3, scoresObj.tx4, scoresObj.tx5]
+            .filter((s: any) => s && s !== "none" && !isNaN(parseFloat(s)))
+            .map((s: any) => parseFloat(s));
+          
+          const gk = scoresObj.gk && !isNaN(parseFloat(scoresObj.gk)) ? parseFloat(scoresObj.gk) : 0;
+          const ck = scoresObj.ck && !isNaN(parseFloat(scoresObj.ck)) ? parseFloat(scoresObj.ck) : 0;
+
+          if (tx.length > 0 && gk > 0 && ck > 0) {
+            const txSum = tx.reduce((a: number, b: number) => a + b, 0);
+            const divisor = tx.length + 5;
+            const average = (txSum + gk * 2 + ck * 3) / divisor;
+            totalScore += average;
+            subjectCount++;
+          }
+        });
+        
+        const overallAverage = subjectCount > 0 ? totalScore / subjectCount : 0;
+        setAverageScore(Math.round(overallAverage * 10) / 10);
 
         // Find low score subjects (< 6.5)
-        const lowSubjects = convertedScores.filter((_, index) => {
-          return Number(gradesData[index].score) < 6.5;
+        const lowSubjects = convertedScores.filter((item) => {
+          const scoresObj = item.scores as any;
+          const tx = [scoresObj.tx1, scoresObj.tx2, scoresObj.tx3, scoresObj.tx4, scoresObj.tx5]
+            .filter((s: any) => s && s !== "none" && !isNaN(parseFloat(s)))
+            .map((s: any) => parseFloat(s));
+          
+          const gk = scoresObj.gk && !isNaN(parseFloat(scoresObj.gk)) ? parseFloat(scoresObj.gk) : 0;
+          const ck = scoresObj.ck && !isNaN(parseFloat(scoresObj.ck)) ? parseFloat(scoresObj.ck) : 0;
+
+          if (tx.length > 0 && gk > 0 && ck > 0) {
+            const txSum = tx.reduce((a: number, b: number) => a + b, 0);
+            const divisor = tx.length + 5;
+            const average = (txSum + gk * 2 + ck * 3) / divisor;
+            return average < 6.5;
+          }
+          return false;
         });
         setLowScoreSubjects(lowSubjects);
       } else {
@@ -193,6 +240,17 @@ const Dashboard = () => {
         setAverageScore(0);
         setLowScoreSubjects([]);
       }
+      
+      // Load latest achievement
+      const { data: latestAch } = await supabase
+        .from("achievements")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+      
+      setLatestAchievement(latestAch);
 
       // Calculate access frequency (số lần truy cập trong 7 ngày qua)
       setAccessFrequency(5); // Mock data, có thể implement tracking thực tế
@@ -463,20 +521,97 @@ const Dashboard = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Average Score Card */}
+        <Card className="p-6">
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg ${
+              moodData.color === "text-success" ? "bg-gradient-to-br from-success/20 to-success/40" :
+              moodData.color === "text-warning" ? "bg-gradient-to-br from-warning/20 to-warning/40" : "bg-gradient-to-br from-destructive/20 to-destructive/40"
+            }`}>
+              <MoodIcon className={`w-10 h-10 ${moodData.color}`} />
+            </div>
+            <p className="text-sm text-muted-foreground mb-1 font-medium">📈 Điểm trung bình</p>
+            <p className="text-4xl font-extrabold mb-2 text-foreground">{averageScore > 0 ? averageScore.toFixed(1) : '0.0'}/10</p>
+            <p className={`text-center font-semibold text-sm ${moodData.color}`}>
+              {moodData.message}
+            </p>
+          </div>
+        </Card>
+
+        {/* Study Time Card */}
+        <Card className="p-6">
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg bg-gradient-to-br from-primary/20 to-primary/40">
+              <ListTodo className="w-10 h-10 text-primary" />
+            </div>
+            <p className="text-sm text-muted-foreground mb-1 font-medium">⏰ Thời lượng học hôm nay</p>
+            <p className="text-4xl font-extrabold mb-2 text-foreground">{(studyTimeToday / 60).toFixed(1)}h</p>
+            <div className="w-full bg-muted rounded-full h-2 mt-2">
+              <div 
+                className="bg-primary h-2 rounded-full transition-all"
+                style={{ width: `${Math.min((studyTimeToday / 180) * 100, 100)}%` }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">Mục tiêu: 3 giờ/ngày</p>
+          </div>
+        </Card>
+
+        {/* Schedule Progress Card */}
+        <Card className="p-6">
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg bg-gradient-to-br from-mai-light to-mai">
+              <CheckCircle2 className="w-10 h-10 text-foreground" />
+            </div>
+            <p className="text-sm text-muted-foreground mb-1 font-medium">🧩 Tiến độ lịch học</p>
+            <p className="text-4xl font-extrabold mb-2 text-foreground">
+              {scheduleProgress.completed}/{scheduleProgress.total}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {scheduleProgress.total > 0 
+                ? `${Math.round((scheduleProgress.completed / scheduleProgress.total) * 100)}% hoàn thành`
+                : "Chưa có lịch học"}
+            </p>
+          </div>
+        </Card>
+
+        {/* Latest Achievement Card */}
+        <Card className="p-6">
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg bg-gradient-to-br from-warning/30 to-warning/50">
+              <Trophy className="w-10 h-10 text-warning" />
+            </div>
+            <p className="text-sm text-muted-foreground mb-1 font-medium">🏆 Thành tích gần đây</p>
+            {latestAchievement ? (
+              <>
+                <p className="text-lg font-extrabold text-foreground text-center">{latestAchievement.title}</p>
+                <p className="text-xs text-muted-foreground text-center mt-1">{latestAchievement.description}</p>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Chưa có thành tích</p>
+            )}
+          </div>
+        </Card>
+      </div>
+
+      {/* Original Cards - Keep below for backward compatibility */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="p-6">
           <div className="flex items-start justify-between mb-4">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-mai-light to-mai flex items-center justify-center shadow-md">
               <Calendar className="w-7 h-7 text-foreground" />
             </div>
           </div>
-          <p className="text-sm text-muted-foreground mb-1 font-medium">Lịch học hôm nay</p>
+          <p className="text-sm text-muted-foreground mb-1 font-medium">📅 Lịch học hôm nay</p>
           <p className="text-3xl font-extrabold mb-2 text-foreground">{todaySchedule.length}</p>
           <div className="mt-3 space-y-2 max-h-32 overflow-y-auto">
             {todaySchedule.length > 0 ? (
               todaySchedule.map((item: any, idx: number) => (
                 <div key={idx} className="flex items-start gap-2 text-sm border-l-2 border-mai pl-3 py-1">
                   <div className="flex flex-col flex-1">
-                    <span className="font-semibold text-foreground">{item.subject}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-foreground">{item.subject}</span>
+                      {item.completed && <CheckCircle2 className="w-4 h-4 text-success" />}
+                    </div>
                     <span className="text-xs text-muted-foreground">
                       {item.time}
                       {item.type === "extra" && item.session && ` • ${item.session}`}
@@ -526,35 +661,6 @@ const Dashboard = () => {
           </div>
         </Card>
 
-        <Card className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-warning/30 to-warning/50 flex items-center justify-center shadow-md">
-              <Trophy className="w-7 h-7 text-warning" />
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground mb-1 font-medium">Thành tích đạt được</p>
-          <p className="text-3xl font-extrabold text-foreground">{achievementsCount}</p>
-          <p className="text-xs text-muted-foreground mt-2 font-medium">
-            {achievementsCount > 0 ? "Tổng số huy hiệu" : "Chưa có dữ liệu"}
-          </p>
-        </Card>
-
-        {/* Average Score with Mood */}
-        <Card className="p-6">
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg ${
-              moodData.color === "text-success" ? "bg-gradient-to-br from-success/20 to-success/40" :
-              moodData.color === "text-warning" ? "bg-gradient-to-br from-warning/20 to-warning/40" : "bg-gradient-to-br from-destructive/20 to-destructive/40"
-            }`}>
-              <MoodIcon className={`w-10 h-10 ${moodData.color}`} />
-            </div>
-            <p className="text-sm text-muted-foreground mb-1 font-medium">Điểm trung bình</p>
-            <p className="text-4xl font-extrabold mb-2 text-foreground">{averageScore > 0 ? averageScore.toFixed(1) : '0.0'}</p>
-            <p className={`text-center font-semibold text-sm ${moodData.color}`}>
-              {moodData.message}
-            </p>
-          </div>
-        </Card>
       </div>
 
       {/* Activities Section */}
