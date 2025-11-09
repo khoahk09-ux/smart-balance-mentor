@@ -150,7 +150,14 @@ Trả về JSON.`;
     let result;
     if (action === 'generate_practice' || action === 'classify_error') {
       try {
-        result = JSON.parse(content);
+        // Remove markdown code blocks if present
+        let cleanContent = content.trim();
+        if (cleanContent.startsWith('```json')) {
+          cleanContent = cleanContent.replace(/^```json\n/, '').replace(/\n```$/, '');
+        } else if (cleanContent.startsWith('```')) {
+          cleanContent = cleanContent.replace(/^```\n/, '').replace(/\n```$/, '');
+        }
+        result = JSON.parse(cleanContent);
       } catch (e) {
         console.error('Failed to parse JSON:', content);
         result = { error: 'Failed to parse AI response', raw: content };
