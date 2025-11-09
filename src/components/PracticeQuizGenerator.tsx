@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Target, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +17,12 @@ interface Mistake {
 
 interface PracticeQuestion {
   question_text: string;
+  options: {
+    A: string;
+    B: string;
+    C: string;
+    D: string;
+  };
   correct_answer: string;
   explanation: string;
   difficulty_level: string;
@@ -64,8 +69,8 @@ const PracticeQuizGenerator = ({ mistake, mistakeHistory }: Props) => {
   };
 
   const checkAnswer = (index: number) => {
-    const userAnswer = userAnswers[index]?.trim().toLowerCase();
-    const correctAnswer = questions[index].correct_answer.trim().toLowerCase();
+    const userAnswer = userAnswers[index];
+    const correctAnswer = questions[index].correct_answer;
     
     setSubmitted({ ...submitted, [index]: true });
 
@@ -124,38 +129,71 @@ const PracticeQuizGenerator = ({ mistake, mistakeHistory }: Props) => {
 
               <MathRenderer content={q.question_text} className="mb-3 text-base" />
 
-              <div className="flex gap-2 mb-3">
-                <Input
-                  placeholder="Nhập câu trả lời của bạn"
-                  value={userAnswers[index] || ''}
-                  onChange={(e) => setUserAnswers({ ...userAnswers, [index]: e.target.value })}
-                  disabled={submitted[index]}
-                  className="flex-1"
-                />
-                <Button
-                  onClick={() => checkAnswer(index)}
-                  disabled={!userAnswers[index] || submitted[index]}
-                  size="sm"
-                >
-                  Kiểm tra
-                </Button>
+              <div className="space-y-2 mb-3">
+                {(['A', 'B', 'C', 'D'] as const).map((option) => (
+                  <label
+                    key={option}
+                    className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      submitted[index]
+                        ? option === q.correct_answer
+                          ? 'bg-success/10 border-success'
+                          : userAnswers[index] === option
+                          ? 'bg-destructive/10 border-destructive'
+                          : 'bg-background border-border opacity-50'
+                        : userAnswers[index] === option
+                        ? 'bg-primary/10 border-primary'
+                        : 'bg-background border-border hover:border-primary/50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={`question-${index}`}
+                      value={option}
+                      checked={userAnswers[index] === option}
+                      onChange={(e) => setUserAnswers({ ...userAnswers, [index]: e.target.value })}
+                      disabled={submitted[index]}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <span className="font-semibold mr-2">{option}.</span>
+                      <MathRenderer content={q.options[option]} className="inline" />
+                    </div>
+                    {submitted[index] && option === q.correct_answer && (
+                      <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
+                    )}
+                    {submitted[index] && userAnswers[index] === option && option !== q.correct_answer && (
+                      <XCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+                    )}
+                  </label>
+                ))}
               </div>
 
+              <Button
+                onClick={() => checkAnswer(index)}
+                disabled={!userAnswers[index] || submitted[index]}
+                size="sm"
+                className="w-full"
+              >
+                Kiểm tra
+              </Button>
+
               {submitted[index] && (
-                <div className="space-y-2">
+                <div className="space-y-2 mt-3">
                   <div className={`p-3 rounded-lg flex items-start gap-2 ${
-                    userAnswers[index]?.trim().toLowerCase() === q.correct_answer.trim().toLowerCase()
+                    userAnswers[index] === q.correct_answer
                       ? 'bg-success/10 border border-success/20'
                       : 'bg-destructive/10 border border-destructive/20'
                   }`}>
-                    {userAnswers[index]?.trim().toLowerCase() === q.correct_answer.trim().toLowerCase() ? (
+                    {userAnswers[index] === q.correct_answer ? (
                       <CheckCircle2 className="w-5 h-5 text-success mt-0.5" />
                     ) : (
                       <XCircle className="w-5 h-5 text-destructive mt-0.5" />
                     )}
                     <div className="flex-1">
-                      <p className="text-sm font-medium mb-1">Đáp án đúng:</p>
-                      <MathRenderer content={q.correct_answer} className="text-sm" />
+                      <p className="text-sm font-medium mb-1">
+                        {userAnswers[index] === q.correct_answer ? 'Chính xác!' : `Đáp án đúng: ${q.correct_answer}`}
+                      </p>
+                      <MathRenderer content={q.options[q.correct_answer as 'A' | 'B' | 'C' | 'D']} className="text-sm" />
                     </div>
                   </div>
 

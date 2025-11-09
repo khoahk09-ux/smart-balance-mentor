@@ -54,22 +54,28 @@ Hãy viết bằng tiếng Việt, ngắn gọn, dễ hiểu.`;
 Hãy giải thích chi tiết theo format đã cho.`;
 
     } else if (action === 'generate_practice') {
-      systemPrompt = `Bạn là hệ thống tạo câu hỏi luyện tập thông minh. Dựa trên lịch sử lỗi sai của học sinh, hãy tạo 5 câu hỏi luyện tập tương tự.
+      systemPrompt = `Bạn là hệ thống tạo câu hỏi trắc nghiệm thông minh. Dựa trên lịch sử lỗi sai của học sinh, hãy tạo 5 câu hỏi trắc nghiệm với 4 đáp án A, B, C, D.
 
 Yêu cầu:
-- Tạo đúng 5 câu hỏi
+- Tạo đúng 5 câu hỏi trắc nghiệm
+- Mỗi câu có 4 đáp án (A, B, C, D) với 1 đáp án đúng
 - Các câu hỏi phải cùng dạng bài với câu đã sai
 - Thay đổi số liệu và bối cảnh để học sinh không học vẹt
-- Ưu tiên các lỗi lặp lại nhiều lần
-- Mỗi câu hỏi phải có: question_text, correct_answer, explanation
+- Các đáp án sai phải hợp lý, không quá dễ nhận biết
 - Format trả về phải là JSON array hợp lệ
 
 Trả về theo format JSON:
 [
   {
     "question_text": "...",
-    "correct_answer": "...",
-    "explanation": "...",
+    "options": {
+      "A": "đáp án A",
+      "B": "đáp án B", 
+      "C": "đáp án C",
+      "D": "đáp án D"
+    },
+    "correct_answer": "A|B|C|D",
+    "explanation": "giải thích tại sao đáp án này đúng",
     "difficulty_level": "easy|medium|hard"
   }
 ]`;
