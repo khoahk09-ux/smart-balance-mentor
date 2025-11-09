@@ -78,7 +78,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
                 activeTab === "quiz" ? "text-[#F25C3C] font-medium" : "hover:text-[#F25C3C]"
               )}
             >
-              📄 Đề thi gần đây
+              📄 Bài kiểm tra
             </button>
           </div>
         )}
