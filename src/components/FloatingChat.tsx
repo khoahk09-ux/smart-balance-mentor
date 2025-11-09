@@ -84,7 +84,7 @@ export default function FloatingChat() {
         <Draggable>
           <button
             onClick={() => setIsChatOpen(true)}
-            className="fixed bottom-6 right-6 bg-[#FFDCDC] text-[#6B3F3F] w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl hover:scale-105 transition cursor-pointer select-none border border-[#F7B7B7] z-50"
+            className="fixed bottom-6 right-6 bg-[#f4c430] text-[#333] w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl hover:scale-105 hover:bg-[#e0b01d] transition cursor-pointer select-none z-50"
           >
             💬
           </button>
@@ -94,30 +94,29 @@ export default function FloatingChat() {
       {/* Hộp Chat */}
       {isChatOpen && (
         <Draggable handle=".chat-header">
-          <div className="fixed bottom-16 right-6 w-80 h-96 bg-[#FFF8F3] border border-[#F3D4D4] rounded-2xl shadow-[0_4px_12px_rgba(0,0,0,0.12)] flex flex-col select-none overflow-hidden z-50">
+          <div className="fixed bottom-16 right-6 w-80 h-[420px] bg-white/[0.35] backdrop-blur-[18px] border border-white/45 rounded-[22px] shadow-[0_8px_20px_rgba(0,0,0,0.12)] flex flex-col select-none overflow-hidden z-50 p-3">
             
             {/* Header */}
-            <div className="chat-header bg-[#FFE9E4] px-3 py-3 flex justify-between items-center border-b border-[#F3CBCB] cursor-move">
-              <div className="flex items-center gap-2 text-[#6B3F3F] font-semibold">
-                🌸 AI Chat
-              </div>
+            <div className="chat-header flex items-center gap-2 font-semibold pb-2 cursor-move text-[#333]">
+              <img src="https://i.ibb.co/Xx6zP2m/flower.png" alt="flower" className="w-[22px]" />
+              <span>AI Chat</span>
               <button
                 onClick={() => setIsChatOpen(false)}
-                className="text-[#A07070] hover:text-[#6B3F3F] transition"
+                className="ml-auto text-[#666] hover:text-[#333] transition"
               >
                 ✖
               </button>
             </div>
 
             {/* Message area */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-2">
+            <div className="flex-1 overflow-y-auto pr-1 space-y-2">
               {messages.map((msg, i) => (
                 <div
                   key={i}
-                  className={`max-w-[75%] px-3 py-2 text-sm rounded-xl ${
+                  className={`max-w-[75%] px-3 py-2 text-sm leading-[1.36] rounded-[18px] ${
                     msg.sender === "user"
-                      ? "ml-auto bg-[#DCFCE7] text-[#22543D]"
-                      : "mr-auto bg-white text-[#5A4A4A] border border-[#F0DADA]"
+                      ? "ml-auto bg-white shadow-[0_2px_4px_rgba(0,0,0,0.06)]"
+                      : "mr-auto bg-[#fff6d6] shadow-[0_2px_4px_rgba(0,0,0,0.08)]"
                   }`}
                 >
                   {msg.text}
@@ -126,14 +125,20 @@ export default function FloatingChat() {
             </div>
 
             {/* Input */}
-            <div className="p-3 border-t border-[#F3CBCB] bg-[#FFF5F3]">
+            <div className="flex gap-1.5 mt-1.5">
               <input
-                className="w-full px-3 py-2 text-sm rounded-xl border border-[#F2CACA] focus:outline-none focus:ring-2 focus:ring-[#FFB7C2]"
+                className="flex-1 rounded-full border border-[#ddd] px-3.5 py-2 text-sm outline-none"
                 placeholder="Nhập tin nhắn..."
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               />
+              <button
+                onClick={sendMessage}
+                className="bg-[#f4c430] hover:bg-[#e0b01d] px-3.5 py-2 rounded-full font-bold transition"
+              >
+                ➤
+              </button>
             </div>
           </div>
         </Draggable>
