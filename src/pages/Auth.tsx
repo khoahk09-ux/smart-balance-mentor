@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEffect } from 'react';
+import logo from '@/assets/logo.png';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -84,8 +84,8 @@ const Auth = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <BookOpen className="w-7 h-7 text-primary-foreground" />
+          <div className="mx-auto">
+            <img src={logo} alt="SmartStudy Balance Logo" className="w-16 h-16 mx-auto rounded-xl" />
           </div>
           <div>
             <CardTitle className="text-2xl">
