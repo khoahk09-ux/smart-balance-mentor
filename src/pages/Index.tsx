@@ -23,12 +23,10 @@ import Achievements from "@/components/Achievements";
 import MistakeReview from "@/components/MistakeReview";
 import Sidebar from "@/components/Sidebar";
 import RightPanel from "@/components/RightPanel";
+import FloatingChat from "@/components/FloatingChat";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
-  const [inputText, setInputText] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -44,62 +42,6 @@ const Index = () => {
       description: t('logoutMessage'),
     });
     navigate('/auth');
-  };
-
-  const sendMessage = async () => {
-    if (!inputText.trim()) return;
-
-    const userMsg = inputText;
-    setMessages((prev) => [...prev, { sender: "user", text: userMsg }]);
-    setInputText("");
-
-    try {
-      const { data, error } = await supabase.functions.invoke('ai-tutor-chat', {
-        body: { messages: [{ role: "user", content: userMsg }] }
-      });
-
-      if (error) throw error;
-
-      // Handle streaming response
-      const reader = data.getReader();
-      const decoder = new TextDecoder();
-      let aiResponse = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n');
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const jsonStr = line.slice(6).trim();
-            if (jsonStr === '[DONE]') continue;
-            
-            try {
-              const parsed = JSON.parse(jsonStr);
-              const content = parsed.choices?.[0]?.delta?.content;
-              if (content) {
-                aiResponse += content;
-                setMessages((prev) => {
-                  const lastMsg = prev[prev.length - 1];
-                  if (lastMsg?.sender === "ai") {
-                    return [...prev.slice(0, -1), { sender: "ai", text: aiResponse }];
-                  }
-                  return [...prev, { sender: "ai", text: aiResponse }];
-                });
-              }
-            } catch (e) {
-              // Skip invalid JSON
-            }
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Chat error:", error);
-      setMessages((prev) => [...prev, { sender: "ai", text: "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại." }]);
-    }
   };
 
   const renderContent = () => {
@@ -244,53 +186,8 @@ const Index = () => {
       {/* Right Panel */}
       <RightPanel />
 
-      {/* Chat Bubble Button */}
-      <button
-        onClick={() => setIsChatOpen(true)}
-        className="fixed bottom-6 right-6 bg-accent hover:bg-accent/80 p-4 rounded-full shadow-lg hover:scale-105 transition-all z-50"
-      >
-        💬
-      </button>
-
-      {/* Chat Panel */}
-      {isChatOpen && (
-        <div className="fixed bottom-20 right-6 w-80 h-96 bg-card border border-border rounded-2xl shadow-xl flex flex-col z-50">
-          <div className="flex items-center justify-between px-4 py-3 bg-accent/20 rounded-t-2xl border-b border-border">
-            <span className="font-semibold text-sm">AI Chat</span>
-            <button 
-              onClick={() => setIsChatOpen(false)}
-              className="hover:text-destructive transition-colors"
-            >
-              ✖
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-3 space-y-2">
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`p-2 max-w-[75%] rounded-lg text-sm ${
-                  msg.sender === "user"
-                    ? "ml-auto bg-primary text-primary-foreground"
-                    : "mr-auto bg-muted"
-                }`}
-              >
-                {msg.text}
-              </div>
-            ))}
-          </div>
-
-          <div className="p-3 border-t border-border">
-            <input
-              className="w-full border border-input bg-background rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="Nhập tin nhắn..."
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-            />
-          </div>
-        </div>
-      )}
+      {/* Floating Chat Component */}
+      <FloatingChat />
     </div>
   );
 };
