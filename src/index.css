@@ -148,27 +148,21 @@ All colors MUST be HSL.
   }
 }
 
-/* Falling Mai Flowers Animation */
-@keyframes fall {
-  0% { 
-    transform: translateY(0) rotate(0deg);
-    opacity: 0.5;
-  }
-  100% { 
-    transform: translateY(120vh) rotate(360deg);
-    opacity: 0.3;
-  }
-}
-
-.falling-flower {
+/* Flower Rain Animation */
+.flower-rain {
   position: fixed;
   top: -50px;
-  width: 26px;
-  height: 26px;
+  color: #ff9ecd;
+  animation: flower-fall linear forwards;
+  z-index: 9999;
   pointer-events: none;
-  opacity: 0.5;
-  animation: fall linear infinite;
-  z-index: 1;
+}
+
+@keyframes flower-fall {
+  to {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
 }
 
 /* Hover effects for cards */

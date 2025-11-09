@@ -1,46 +1,22 @@
-import { useEffect, useState } from 'react';
-import maiFlower from '@/assets/mai-flower.png';
-
-interface Flower {
-  id: number;
-  left: number;
-  animationDuration: number;
-  size: number;
-  delay: number;
-}
+import { useEffect } from 'react';
 
 export const FallingFlowers = () => {
-  const [flowers, setFlowers] = useState<Flower[]>([]);
-
   useEffect(() => {
-    // Generate 12 random flowers
-    const generatedFlowers = Array.from({ length: 12 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100, // Random position from 0-100%
-      animationDuration: 15 + Math.random() * 10, // 15-25 seconds
-      size: 16 + Math.random() * 10, // 16-26px
-      delay: Math.random() * 5, // 0-5 seconds delay
-    }));
-    setFlowers(generatedFlowers);
+    const createFlower = () => {
+      const flower = document.createElement("div");
+      flower.className = "flower-rain";
+      flower.textContent = "🌸";
+      flower.style.left = Math.random() * 100 + "vw";
+      flower.style.animationDuration = 4 + Math.random() * 3 + "s";
+      flower.style.fontSize = 14 + Math.random() * 20 + "px";
+      document.body.appendChild(flower);
+
+      setTimeout(() => flower.remove(), 7000);
+    };
+
+    const interval = setInterval(createFlower, 400);
+    return () => clearInterval(interval);
   }, []);
 
-  return (
-    <div className="pointer-events-none fixed inset-0 z-1">
-      {flowers.map((flower) => (
-        <img
-          key={flower.id}
-          src={maiFlower}
-          alt=""
-          className="falling-flower"
-          style={{
-            left: `${flower.left}%`,
-            width: `${flower.size}px`,
-            height: `${flower.size}px`,
-            animationDuration: `${flower.animationDuration}s`,
-            animationDelay: `${flower.delay}s`,
-          }}
-        />
-      ))}
-    </div>
-  );
+  return null;
 };

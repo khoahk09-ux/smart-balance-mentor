@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { FallingFlowers } from "./components/FallingFlowers";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SubjectSelection from "./pages/SubjectSelection";
@@ -18,6 +19,7 @@ const App = () => (
     <TooltipProvider>
       <LanguageProvider>
         <AuthProvider>
+          <FallingFlowers />
           <Toaster />
           <Sonner />
           <BrowserRouter>
