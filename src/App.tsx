@@ -7,6 +7,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { FallingFlowers } from "./components/FallingFlowers";
+import { TetClickEffect } from "./components/TetClickEffect";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import SubjectSelection from "./pages/SubjectSelection";
@@ -20,6 +21,7 @@ const App = () => (
       <LanguageProvider>
         <AuthProvider>
           <FallingFlowers />
+          <TetClickEffect />
           <Toaster />
           <Sonner />
           <BrowserRouter>
