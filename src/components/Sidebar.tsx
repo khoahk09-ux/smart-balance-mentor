@@ -1,4 +1,5 @@
-import { BookOpen, BarChart3, Target, Calendar, MessageSquare, Settings, Brain, Trophy, BookMarked } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -9,56 +10,123 @@ interface SidebarProps {
 
 const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
   const { t } = useLanguage();
-  
-  const menuItems = [
-    { id: "dashboard", label: t('dashboard'), icon: BarChart3 },
-    { id: "scores", label: t('scores'), icon: Target },
-    { id: "quiz", label: t('quiz'), icon: Brain },
-    { id: "mistakes", label: "Ôn tập lỗi sai", icon: BookMarked },
-    { id: "schedule", label: t('schedule'), icon: Calendar },
-    { id: "achievements", label: t('achievements'), icon: Trophy },
-    { id: "ai-tutor", label: t('aiChat'), icon: MessageSquare },
-    { id: "profile", label: t('settings'), icon: Settings },
-  ];
+  const [quizMenuOpen, setQuizMenuOpen] = useState(false);
 
   return (
-    <div className="w-64 h-screen bg-card border-r border-border/50 flex flex-col sticky top-0">
+    <div className="w-64 bg-[#FFF9F5] h-screen p-4 flex flex-col gap-3 text-[#5C4B3B] sticky top-0">
       {/* Logo */}
-      <div className="p-6 border-b border-border/50">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-            <BookOpen className="w-6 h-6 text-primary-foreground" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {t('appName')}
-            </h1>
-            <p className="text-xs text-muted-foreground">{t('appSubtitle')}</p>
-          </div>
+      <div className="flex items-center gap-2 mb-6">
+        <div className="bg-gradient-to-r from-orange-400 to-red-400 text-white p-2 rounded-lg">
+          📘
+        </div>
+        <div>
+          <h1 className="font-bold text-lg text-[#F25C3C]">SmartStudy</h1>
+          <p className="text-sm text-gray-500">Balance</p>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-2">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          return (
+      {/* Dashboard */}
+      <button
+        onClick={() => onTabChange("dashboard")}
+        className={cn(
+          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
+          activeTab === "dashboard" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+        )}
+      >
+        📊 Dashboard
+      </button>
+
+      {/* Điểm số */}
+      <button
+        onClick={() => onTabChange("scores")}
+        className={cn(
+          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
+          activeTab === "scores" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+        )}
+      >
+        🎯 Điểm số
+      </button>
+
+      {/* Kiểm tra + submenu */}
+      <div>
+        <button
+          onClick={() => setQuizMenuOpen(!quizMenuOpen)}
+          className={cn(
+            "flex w-full justify-between items-center px-2 py-2 rounded-lg transition-colors",
+            (activeTab === "quiz" || activeTab === "mistakes") ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+          )}
+        >
+          <span className="flex items-center gap-2">🧠 Kiểm tra</span>
+          {quizMenuOpen ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+        </button>
+
+        {quizMenuOpen && (
+          <div className="ml-6 mt-2 flex flex-col gap-2 text-sm">
             <button
-              key={item.id}
-              onClick={() => onTabChange(item.id)}
+              onClick={() => onTabChange("mistakes")}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
-                activeTab === item.id
-                  ? "bg-primary text-primary-foreground shadow-lg"
-                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                "text-left px-2 py-1 rounded transition-colors",
+                activeTab === "mistakes" ? "text-[#F25C3C] font-medium" : "hover:text-[#F25C3C]"
               )}
             >
-              <Icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
+              🔁 Ôn tập lỗi sai
             </button>
-          );
-        })}
-      </nav>
+            <button
+              onClick={() => onTabChange("quiz")}
+              className={cn(
+                "text-left px-2 py-1 rounded transition-colors",
+                activeTab === "quiz" ? "text-[#F25C3C] font-medium" : "hover:text-[#F25C3C]"
+              )}
+            >
+              📄 Đề thi gần đây
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Lịch học */}
+      <button
+        onClick={() => onTabChange("schedule")}
+        className={cn(
+          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
+          activeTab === "schedule" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+        )}
+      >
+        📅 Lịch học
+      </button>
+
+      {/* Thành tích */}
+      <button
+        onClick={() => onTabChange("achievements")}
+        className={cn(
+          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
+          activeTab === "achievements" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+        )}
+      >
+        🏆 Thành tích
+      </button>
+
+      {/* AI Chat */}
+      <button
+        onClick={() => onTabChange("ai-tutor")}
+        className={cn(
+          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
+          activeTab === "ai-tutor" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+        )}
+      >
+        💬 AI Chat
+      </button>
+
+      {/* Cài đặt */}
+      <button
+        onClick={() => onTabChange("profile")}
+        className={cn(
+          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
+          activeTab === "profile" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+        )}
+      >
+        ⚙️ Cài đặt
+      </button>
     </div>
   );
 };
