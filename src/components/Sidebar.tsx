@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
+import logo from "@/assets/logo.png";
 
 interface SidebarProps {
   activeTab: string;
@@ -15,10 +16,8 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
   return (
     <div className="w-64 bg-[#FFF9F5] h-screen p-4 flex flex-col gap-3 text-[#5C4B3B] sticky top-0">
       {/* Logo */}
-      <div className="flex items-center gap-2 mb-6">
-        <div className="bg-gradient-to-r from-orange-400 to-red-400 text-white p-2 rounded-lg">
-          📘
-        </div>
+      <div className="flex items-center gap-3 mb-6">
+        <img src={logo} alt="SmartStudy Balance Logo" className="w-12 h-12 rounded-xl" />
         <div>
           <h1 className="font-bold text-lg text-[#F25C3C]">SmartStudy</h1>
           <p className="text-sm text-gray-500">Balance</p>
