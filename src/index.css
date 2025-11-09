@@ -154,7 +154,7 @@ All colors MUST be HSL.
   top: -50px;
   color: #ff9ecd;
   animation: flower-fall linear forwards;
-  z-index: 9999;
+  z-index: 1;
   pointer-events: none;
 }
 
