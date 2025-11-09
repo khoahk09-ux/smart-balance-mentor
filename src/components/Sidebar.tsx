@@ -105,17 +105,6 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
         🏆 Thành tích
       </button>
 
-      {/* AI Chat */}
-      <button
-        onClick={() => onTabChange("ai-tutor")}
-        className={cn(
-          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
-          activeTab === "ai-tutor" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
-        )}
-      >
-        💬 AI Chat
-      </button>
-
       {/* Cài đặt */}
       <button
         onClick={() => onTabChange("profile")}

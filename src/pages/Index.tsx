@@ -58,8 +58,6 @@ const Index = () => {
         return <ScheduleTable />;
       case "achievements":
         return <Achievements />;
-      case "ai-tutor":
-        return <AIChat />;
       case "profile":
         return (
           <div className="p-6 max-w-2xl">
@@ -139,7 +137,6 @@ const Index = () => {
                    activeTab === "mistakes" ? "Ôn tập lỗi sai" :
                    activeTab === "schedule" ? t('schedule') :
                    activeTab === "achievements" ? t('achievements') :
-                   activeTab === "ai-tutor" ? t('aiChat') :
                    t('settings')}
                 </h1>
                 <p className="text-sm text-muted-foreground">
