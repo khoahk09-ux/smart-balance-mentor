@@ -85,7 +85,7 @@ const Auth = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
           <div className="mx-auto">
-            <img src={logo} alt="SmartStudy Balance Logo" className="w-16 h-16 mx-auto rounded-xl" />
+            <img src={logo} alt="SmartStudy Balance Logo" className="w-16 h-16 mx-auto rounded-xl animate-fade-in animate-scale-in" />
           </div>
           <div>
             <CardTitle className="text-2xl">
