@@ -31,7 +31,7 @@ export const FallingFlowers = () => {
       setTimeout(() => flower.remove(), 7000);
     };
 
-    const interval = setInterval(createFlower, 400);
+    const interval = setInterval(createFlower, 800);
     return () => clearInterval(interval);
   }, []);
 

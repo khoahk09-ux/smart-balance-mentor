@@ -14,13 +14,13 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
   const [quizMenuOpen, setQuizMenuOpen] = useState(false);
 
   return (
-    <div className="w-64 bg-[#FFF9F5] h-screen p-4 flex flex-col gap-3 text-[#5C4B3B] sticky top-0">
+    <div className="w-64 h-screen p-4.5 flex flex-col gap-2.5 sticky top-0 rounded-[20px] bg-white/20 backdrop-blur-[12px] border border-white/20 shadow-[0_8px_32px_rgba(31,38,135,0.37)]">
       {/* Logo */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-6 px-2">
         <img src={logo} alt="SmartStudy Balance Logo" className="w-12 h-12 rounded-xl" />
         <div>
           <h1 className="font-bold text-lg text-[#F25C3C]">SmartStudy</h1>
-          <p className="text-sm text-gray-500">Balance</p>
+          <p className="text-sm text-white/70">Balance</p>
         </div>
       </div>
 
@@ -28,22 +28,26 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
       <button
         onClick={() => onTabChange("dashboard")}
         className={cn(
-          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
-          activeTab === "dashboard" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+          "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 bg-white/10",
+          activeTab === "dashboard" 
+            ? "bg-white/35 text-[#F25C3C] font-medium" 
+            : "text-white hover:bg-white/25 hover:translate-x-1.5"
         )}
       >
-        📊 Dashboard
+        <span className="text-lg">📊</span> Dashboard
       </button>
 
       {/* Điểm số */}
       <button
         onClick={() => onTabChange("scores")}
         className={cn(
-          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
-          activeTab === "scores" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+          "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 bg-white/10",
+          activeTab === "scores" 
+            ? "bg-white/35 text-[#F25C3C] font-medium" 
+            : "text-white hover:bg-white/25 hover:translate-x-1.5"
         )}
       >
-        🎯 Điểm số
+        <span className="text-lg">🎯</span> Điểm số
       </button>
 
       {/* Kiểm tra + submenu - Glassmorphism style */}
@@ -98,33 +102,39 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
       <button
         onClick={() => onTabChange("schedule")}
         className={cn(
-          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
-          activeTab === "schedule" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+          "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 bg-white/10",
+          activeTab === "schedule" 
+            ? "bg-white/35 text-[#F25C3C] font-medium" 
+            : "text-white hover:bg-white/25 hover:translate-x-1.5"
         )}
       >
-        📅 Lịch học
+        <span className="text-lg">🗓️</span> Lịch học
       </button>
 
       {/* Thành tích */}
       <button
         onClick={() => onTabChange("achievements")}
         className={cn(
-          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
-          activeTab === "achievements" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+          "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 bg-white/10",
+          activeTab === "achievements" 
+            ? "bg-white/35 text-[#F25C3C] font-medium" 
+            : "text-white hover:bg-white/25 hover:translate-x-1.5"
         )}
       >
-        🏆 Thành tích
+        <span className="text-lg">🏆</span> Thành tích
       </button>
 
       {/* Cài đặt */}
       <button
         onClick={() => onTabChange("profile")}
         className={cn(
-          "flex items-center gap-2 px-2 py-2 rounded-lg transition-colors",
-          activeTab === "profile" ? "bg-[#F25C3C] text-white" : "hover:text-[#F25C3C]"
+          "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 bg-white/10",
+          activeTab === "profile" 
+            ? "bg-white/35 text-[#F25C3C] font-medium" 
+            : "text-white hover:bg-white/25 hover:translate-x-1.5"
         )}
       >
-        ⚙️ Cài đặt
+        <span className="text-lg">⚙️</span> Cài đặt
       </button>
     </div>
   );
