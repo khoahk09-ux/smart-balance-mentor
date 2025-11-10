@@ -69,17 +69,6 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
         {quizMenuOpen && (
           <div className="mt-2.5 flex flex-col gap-1.5">
             <button
-              onClick={() => onTabChange("quiz")}
-              className={cn(
-                "flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-white/10 transition-all duration-300 text-[15px]",
-                activeTab === "quiz" 
-                  ? "bg-white/25 text-[#F25C3C] font-medium translate-x-1.5" 
-                  : "hover:bg-white/25 hover:translate-x-1.5"
-              )}
-            >
-              <span>📄</span> Bài kiểm tra
-            </button>
-            <button
               onClick={() => onTabChange("mistakes")}
               className={cn(
                 "flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-white/10 transition-all duration-300 text-[15px]",
@@ -89,6 +78,17 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
               )}
             >
               <span>📘</span> Ôn tập lỗi sai
+            </button>
+            <button
+              onClick={() => onTabChange("quiz")}
+              className={cn(
+                "flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-white/10 transition-all duration-300 text-[15px]",
+                activeTab === "quiz" 
+                  ? "bg-white/25 text-[#F25C3C] font-medium translate-x-1.5" 
+                  : "hover:bg-white/25 hover:translate-x-1.5"
+              )}
+            >
+              <span>📄</span> Bài kiểm tra
             </button>
           </div>
         )}
