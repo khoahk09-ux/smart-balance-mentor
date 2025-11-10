@@ -31,7 +31,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
           "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 bg-white/10",
           activeTab === "dashboard" 
             ? "bg-white/35 text-[#FF6B35] font-semibold shadow-lg" 
-            : "text-white/60 hover:bg-white/20 hover:text-white hover:translate-x-1.5"
+            : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
         )}
       >
         <span className="text-lg">📊</span> Dashboard
@@ -44,7 +44,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
           "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 bg-white/10",
           activeTab === "scores" 
             ? "bg-white/35 text-[#FF6B35] font-semibold shadow-lg" 
-            : "text-white/60 hover:bg-white/20 hover:text-white hover:translate-x-1.5"
+            : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
         )}
       >
         <span className="text-lg">🎯</span> Điểm số
@@ -58,7 +58,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
             "flex w-full justify-between items-center px-2.5 py-2 rounded-xl transition-all duration-300 font-semibold text-base",
             (activeTab === "quiz" || activeTab === "mistakes") 
               ? "bg-white/25 text-[#FF6B35] scale-[1.02] shadow-lg" 
-              : "bg-white/10 text-white/60 hover:bg-white/25 hover:text-white hover:scale-[1.02]"
+              : "bg-white/10 text-[#FFB088] hover:bg-white/25 hover:text-[#FF6B35] hover:scale-[1.02]"
           )}
         >
           <span className="flex items-center gap-2">
@@ -78,7 +78,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
                 "flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-white/10 transition-all duration-300 text-[15px]",
                 activeTab === "mistakes" 
                   ? "bg-white/25 text-[#FF6B35] font-semibold translate-x-1.5 shadow-md" 
-                  : "text-white/60 hover:bg-white/20 hover:text-white hover:translate-x-1.5"
+                  : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
               )}
             >
               <span>📘</span> Ôn tập lỗi sai
@@ -89,7 +89,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
                 "flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-white/10 transition-all duration-300 text-[15px]",
                 activeTab === "quiz" 
                   ? "bg-white/25 text-[#FF6B35] font-semibold translate-x-1.5 shadow-md" 
-                  : "text-white/60 hover:bg-white/20 hover:text-white hover:translate-x-1.5"
+                  : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
               )}
             >
               <span>📄</span> Bài kiểm tra
@@ -105,7 +105,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
           "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 bg-white/10",
           activeTab === "schedule" 
             ? "bg-white/35 text-[#FF6B35] font-semibold shadow-lg" 
-            : "text-white/60 hover:bg-white/20 hover:text-white hover:translate-x-1.5"
+            : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
         )}
       >
         <span className="text-lg">🗓️</span> Lịch học
@@ -118,7 +118,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
           "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 bg-white/10",
           activeTab === "achievements" 
             ? "bg-white/35 text-[#FF6B35] font-semibold shadow-lg" 
-            : "text-white/60 hover:bg-white/20 hover:text-white hover:translate-x-1.5"
+            : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
         )}
       >
         <span className="text-lg">🏆</span> Thành tích
@@ -131,7 +131,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
           "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 bg-white/10",
           activeTab === "profile" 
             ? "bg-white/35 text-[#FF6B35] font-semibold shadow-lg" 
-            : "text-white/60 hover:bg-white/20 hover:text-white hover:translate-x-1.5"
+            : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
         )}
       >
         <span className="text-lg">⚙️</span> Cài đặt
