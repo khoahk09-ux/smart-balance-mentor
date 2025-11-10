@@ -64,27 +64,27 @@ const Index = () => {
             <h2 className="text-2xl font-bold mb-6">{t('settings')}</h2>
             <div className="space-y-6">
               {/* Language Settings */}
-              <div className="space-y-3 p-4 border border-border rounded-lg bg-card">
+              <div className="space-y-3 p-5 rounded-2xl bg-white/20 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_rgba(31,38,135,0.37)]">
                 <div className="flex items-center gap-2 mb-2">
-                  <Languages className="w-5 h-5 text-primary" />
-                  <Label className="text-base font-semibold">{t('languageSettings')}</Label>
+                  <Languages className="w-5 h-5 text-[#FF6B35]" />
+                  <Label className="text-base font-semibold text-[#FF6B35]">{t('languageSettings')}</Label>
                 </div>
                 <Select value={language} onValueChange={(value: 'vi' | 'en' | 'zh') => setLanguage(value)}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full rounded-xl bg-white/10 backdrop-blur-sm border-white/30 text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] transition-all">
                     <SelectValue placeholder={t('selectLanguage')} />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="vi">
+                  <SelectContent className="rounded-xl bg-white/90 backdrop-blur-md border-white/30">
+                    <SelectItem value="vi" className="cursor-pointer hover:bg-[#FF6B35]/10">
                       <span className="flex items-center gap-2">
                         🇻🇳 {t('vietnamese')}
                       </span>
                     </SelectItem>
-                    <SelectItem value="en">
+                    <SelectItem value="en" className="cursor-pointer hover:bg-[#FF6B35]/10">
                       <span className="flex items-center gap-2">
                         🇬🇧 {t('english')}
                       </span>
                     </SelectItem>
-                    <SelectItem value="zh">
+                    <SelectItem value="zh" className="cursor-pointer hover:bg-[#FF6B35]/10">
                       <span className="flex items-center gap-2">
                         🇨🇳 {t('chinese')}
                       </span>
@@ -97,7 +97,7 @@ const Index = () => {
               <Button
                 variant="outline"
                 onClick={() => navigate('/subject-selection')}
-                className="w-full justify-start"
+                className="w-full justify-start rounded-xl bg-white/10 backdrop-blur-sm border-white/30 text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] transition-all"
               >
                 <Settings className="w-4 h-4 mr-2" />
                 {t('specializedSubject')}
@@ -105,7 +105,7 @@ const Index = () => {
               <Button
                 variant="outline"
                 onClick={handleLogout}
-                className="w-full justify-start text-destructive hover:text-destructive"
+                className="w-full justify-start rounded-xl bg-white/10 backdrop-blur-sm border-white/30 text-[#FFB088] hover:bg-red-500/20 hover:text-red-500 hover:border-red-500/30 transition-all"
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 {t('logout')}
