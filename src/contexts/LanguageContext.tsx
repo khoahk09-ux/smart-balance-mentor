@@ -7,6 +7,7 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  isChanging: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -16,13 +17,26 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     const saved = localStorage.getItem('app-language');
     return (saved as Language) || 'vi';
   });
+  const [isChanging, setIsChanging] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('app-language', language);
   }, [language]);
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
+    if (lang === language) return;
+    
+    // Trigger fade out
+    setIsChanging(true);
+    
+    // Wait for fade animation then change language
+    setTimeout(() => {
+      setLanguageState(lang);
+      // Trigger fade in
+      setTimeout(() => {
+        setIsChanging(false);
+      }, 50);
+    }, 300);
   };
 
   const t = (key: string): string => {
@@ -30,8 +44,10 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
-      {children}
+    <LanguageContext.Provider value={{ language, setLanguage, t, isChanging }}>
+      <div className={`transition-opacity duration-300 ${isChanging ? 'opacity-0' : 'opacity-100'}`}>
+        {children}
+      </div>
     </LanguageContext.Provider>
   );
 };

@@ -34,7 +34,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
             : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
         )}
       >
-        <span className="text-lg">📊</span> Dashboard
+        <span className="text-lg">📊</span> {t('dashboard')}
       </button>
 
       {/* Điểm số */}
@@ -47,7 +47,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
             : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
         )}
       >
-        <span className="text-lg">🎯</span> Điểm số
+        <span className="text-lg">🎯</span> {t('scores')}
       </button>
 
       {/* Kiểm tra + submenu - Glassmorphism style */}
@@ -63,7 +63,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
         >
           <span className="flex items-center gap-2">
             <span className="text-lg">🧠</span>
-            Kiểm tra
+            {t('quiz')}
           </span>
           <span className="text-sm opacity-80">
             {quizMenuOpen ? "▼" : "▶"}
@@ -71,7 +71,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
         </button>
 
         {quizMenuOpen && (
-          <div className="mt-2.5 flex flex-col gap-1.5">
+          <div className="mt-2.5 flex flex-col gap-1.5 animate-accordion-down">
             <button
               onClick={() => onTabChange("mistakes")}
               className={cn(
@@ -81,7 +81,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
                   : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
               )}
             >
-              <span>📘</span> Ôn tập lỗi sai
+              <span>📘</span> {t('mistakeReview') || 'Ôn tập lỗi sai'}
             </button>
             <button
               onClick={() => onTabChange("quiz")}
@@ -92,7 +92,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
                   : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
               )}
             >
-              <span>📄</span> Bài kiểm tra
+              <span>📄</span> {t('quizTest') || 'Bài kiểm tra'}
             </button>
           </div>
         )}
@@ -108,7 +108,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
             : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
         )}
       >
-        <span className="text-lg">🗓️</span> Lịch học
+        <span className="text-lg">🗓️</span> {t('schedule')}
       </button>
 
       {/* Thành tích */}
@@ -121,7 +121,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
             : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
         )}
       >
-        <span className="text-lg">🏆</span> Thành tích
+        <span className="text-lg">🏆</span> {t('achievements')}
       </button>
 
       {/* Cài đặt */}
@@ -134,7 +134,7 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
             : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
         )}
       >
-        <span className="text-lg">⚙️</span> Cài đặt
+        <span className="text-lg">⚙️</span> {t('settings')}
       </button>
     </div>
   );

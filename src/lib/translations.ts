@@ -87,6 +87,7 @@ const translations = {
     // Quiz
     quizTest: 'Bài kiểm tra AI',
     quizTestDesc: 'AI tự động tạo câu hỏi phù hợp với trình độ',
+    mistakeReview: 'Ôn tập lỗi sai',
     history: 'Lịch sử',
     quizHistory: 'Lịch sử bài kiểm tra',
     viewHistory: 'Xem lại các bài kiểm tra đã làm',
@@ -275,6 +276,7 @@ const translations = {
     // Quiz
     quizTest: 'AI Quiz Test',
     quizTestDesc: 'AI automatically generates questions suitable for your level',
+    mistakeReview: 'Mistake Review',
     history: 'History',
     quizHistory: 'Quiz History',
     viewHistory: 'View previous quizzes',
@@ -463,6 +465,7 @@ const translations = {
     // Quiz
     quizTest: 'AI 测验',
     quizTestDesc: 'AI 自动生成适合你水平的问题',
+    mistakeReview: '复习错误',
     history: '历史记录',
     quizHistory: '测验历史',
     viewHistory: '查看之前的测验',

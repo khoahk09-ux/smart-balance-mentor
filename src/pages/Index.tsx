@@ -69,7 +69,21 @@ const Index = () => {
                   <Languages className="w-5 h-5 text-[#FF6B35]" />
                   <Label className="text-base font-semibold text-[#FF6B35]">{t('languageSettings')}</Label>
                 </div>
-                <Select value={language} onValueChange={(value: 'vi' | 'en' | 'zh') => setLanguage(value)}>
+                <Select 
+                  value={language} 
+                  onValueChange={(value: 'vi' | 'en' | 'zh') => {
+                    setLanguage(value);
+                    const languageNames = {
+                      vi: '🇻🇳 Tiếng Việt',
+                      en: '🇬🇧 English',
+                      zh: '🇨🇳 中文'
+                    };
+                    toast({
+                      title: t('success'),
+                      description: `${t('languageSettings')}: ${languageNames[value]}`,
+                    });
+                  }}
+                >
                   <SelectTrigger className="w-full rounded-xl bg-white/10 backdrop-blur-sm border-white/30 text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] transition-all">
                     <SelectValue placeholder={t('selectLanguage')} />
                   </SelectTrigger>
