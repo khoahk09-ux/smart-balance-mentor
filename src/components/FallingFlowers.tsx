@@ -28,10 +28,10 @@ export const FallingFlowers = () => {
       flower.style.fontSize = 14 + Math.random() * 20 + "px";
       document.body.appendChild(flower);
 
-      setTimeout(() => flower.remove(), 7000);
+      setTimeout(() => flower.remove(), 5000);
     };
 
-    const interval = setInterval(createFlower, 800);
+    const interval = setInterval(createFlower, 1500);
     return () => clearInterval(interval);
   }, []);
 
