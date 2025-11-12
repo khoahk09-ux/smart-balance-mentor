@@ -58,6 +58,7 @@ const Dashboard = () => {
   const [studyTimeToday, setStudyTimeToday] = useState(0);
   const [scheduleProgress, setScheduleProgress] = useState({ completed: 0, total: 0 });
   const [latestAchievement, setLatestAchievement] = useState<any>(null);
+  const [newTask, setNewTask] = useState({ subject: '', task: '' });
 
   useEffect(() => {
     const loadData = async () => {
@@ -392,6 +393,110 @@ const Dashboard = () => {
       toast({
         title: t('recoveredStreak'),
         description: t('recoveryMessage').replace('{count}', data.recovery_count.toString()),
+      });
+    }
+  };
+
+  const handleAddTask = async () => {
+    if (!user || !newTask.subject || !newTask.task) {
+      toast({
+        title: "Lỗi",
+        description: "Vui lòng điền đầy đủ thông tin",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('schedule')
+        .insert({
+          user_id: user.id,
+          date: new Date().toISOString().split('T')[0],
+          subject: newTask.subject,
+          task: newTask.task,
+          completed: false,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Thành công",
+        description: "Đã thêm task thành công!",
+      });
+      setNewTask({ subject: '', task: '' });
+      
+      // Reload schedule data
+      const { data: scheduleData } = await supabase
+        .from("schedule")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("date", new Date().toISOString().split('T')[0])
+        .order("created_at", { ascending: true });
+      
+      if (scheduleData) {
+        const todayClasses = scheduleData.map(item => ({
+          id: item.id,
+          type: "schedule",
+          subject: item.subject,
+          time: item.task,
+          period: item.subject,
+          completed: item.completed || false
+        }));
+        setTodaySchedule(todayClasses);
+        
+        const completedCount = scheduleData.filter(item => item.completed).length;
+        setScheduleProgress({ completed: completedCount, total: scheduleData.length });
+      }
+    } catch (error) {
+      console.error('Error adding task:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể thêm task",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleToggleTask = async (taskId: string, completed: boolean) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('schedule')
+        .update({ completed: !completed })
+        .eq('id', taskId);
+
+      if (error) throw error;
+
+      // Reload schedule data
+      const { data: scheduleData } = await supabase
+        .from("schedule")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("date", new Date().toISOString().split('T')[0])
+        .order("created_at", { ascending: true });
+      
+      if (scheduleData) {
+        const todayClasses = scheduleData.map(item => ({
+          id: item.id,
+          type: "schedule",
+          subject: item.subject,
+          time: item.task,
+          period: item.subject,
+          completed: item.completed || false
+        }));
+        setTodaySchedule(todayClasses);
+        
+        const completedCount = scheduleData.filter(item => item.completed).length;
+        setScheduleProgress({ completed: completedCount, total: scheduleData.length });
+      }
+    } catch (error) {
+      console.error('Error updating task:', error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể cập nhật task",
+        variant: "destructive",
       });
     }
   };
