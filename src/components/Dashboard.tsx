@@ -629,18 +629,52 @@ const Dashboard = () => {
         {/* Today's Schedule */}
         <div className="bg-white p-6 rounded-2xl shadow-md">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">📅 Lịch học hôm nay</h2>
+          
+          {/* Add Task Form */}
+          <div className="mb-4 space-y-2">
+            <input
+              type="text"
+              placeholder="Môn học"
+              value={newTask.subject}
+              onChange={(e) => setNewTask({ ...newTask, subject: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <input
+              type="text"
+              placeholder="Nội dung học"
+              value={newTask.task}
+              onChange={(e) => setNewTask({ ...newTask, task: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <button
+              onClick={handleAddTask}
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+            >
+              Thêm task
+            </button>
+          </div>
+
+          {/* Task List */}
           {todaySchedule.length > 0 ? (
             <div className="space-y-2">
-              {todaySchedule.map((item: any, idx: number) => (
-                <div key={idx} className="flex items-start gap-2 text-sm border-l-2 border-orange-400 pl-3 py-1">
-                  <div className="flex flex-col flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-700">{item.subject}</span>
-                      {item.completed && <CheckCircle2 className="w-4 h-4 text-green-600" />}
-                    </div>
-                    <span className="text-xs text-gray-500">
+              {todaySchedule.map((item: any) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+                >
+                  <input
+                    type="checkbox"
+                    checked={item.completed}
+                    onChange={() => handleToggleTask(item.id, item.completed)}
+                    className="w-4 h-4 text-orange-600 rounded focus:ring-orange-500 cursor-pointer"
+                  />
+                  <div className="flex-1">
+                    <p className={`text-sm font-medium ${item.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
+                      {item.subject}
+                    </p>
+                    <p className={`text-xs ${item.completed ? 'line-through text-gray-300' : 'text-gray-500'}`}>
                       {item.time}
-                    </span>
+                    </p>
                   </div>
                 </div>
               ))}
