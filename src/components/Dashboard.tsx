@@ -398,246 +398,160 @@ const Dashboard = () => {
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'bạn';
 
-  // Get mood based on average score only
-  const getMoodData = () => {
-    if (averageScore >= 8) {
-      return {
-        icon: Smile,
-        message: t('doingGreat'),
-        color: "text-success"
-      };
-    } else if (averageScore >= 5) {
-      return {
-        icon: Meh,
-        message: t('needMoreEffort'),
-        color: "text-warning"
-      };
-    } else {
-      return {
-        icon: Angry,
-        message: t('notTryingHard'),
-        color: "text-destructive"
-      };
-    }
-  };
-
-  const moodData = getMoodData();
-  const MoodIcon = moodData.icon;
-
-  // Prepare chart data - calculate average with proper weights
-  const chartData = scores.map(s => {
-    const scoresObj = s.scores || {};
-    // Calculate average: (TX1 + TX2 + TX3 + TX4 + TX5 + GK*2 + CK*3) / 10
-    const tx1 = scoresObj.tx1 || 0;
-    const tx2 = scoresObj.tx2 || 0;
-    const tx3 = scoresObj.tx3 || 0;
-    const tx4 = scoresObj.tx4 || 0;
-    const tx5 = scoresObj.tx5 || 0;
-    const gk = scoresObj.gk || 0;
-    const ck = scoresObj.ck || 0;
-    
-    // Check if we have any scores
-    const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
-    
-    let avg = 0;
-    if (hasScores) {
-      const total = tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3);
-      avg = total / 10;
-    }
-    
-    return {
-      subject: s.subject,
-      score: parseFloat(avg.toFixed(1))
-    };
-  });
-
-
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="p-6 bg-gradient-to-b from-orange-50 to-white min-h-screen">
       {/* Falling Mai Flowers */}
       <FallingFlowers />
       
-      {/* Welcome Banner - Tet Theme */}
-      <Card className="p-8 bg-gradient-to-r from-tet-red via-primary to-tet-red-light border-none overflow-hidden relative">
-        {/* Mai Branch Decoration */}
-        <img 
-          src={maiBranch} 
-          alt="" 
-          className="absolute top-0 right-0 h-full w-auto opacity-20 pointer-events-none"
-          style={{ filter: 'brightness(1.2)' }}
-        />
-        
-        <div className="flex items-center justify-between relative z-10">
-          <div className="flex-1">
-            <h2 className="text-4xl font-extrabold text-white mb-2">
-              Mùa Xuân rực rỡ – Học tập thăng hoa!
-            </h2>
-            <p className="text-xl font-script text-white/95 mb-6">
-              Cố gắng hôm nay để mai nở hoa thành công
-            </p>
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleCheckIn}
-                disabled={!canCheckIn}
-                className="bg-mai text-foreground hover:bg-mai-dark font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-              >
-                <Check className="w-5 h-5 mr-2" />
-                {canCheckIn ? t('checkInToday') : t('checkedIn')}
-              </Button>
-              {streak === 0 && streakData && streakData.longest_streak > 0 && recoveryCount > 0 && (
-                <Button 
-                  onClick={handleRecoverStreak}
-                  variant="outline"
-                  className="bg-white/10 text-white border-white/20 hover:bg-white/20 backdrop-blur-sm"
-                >
-                  <RotateCcw className="w-4 h-4 mr-2" />
-                  {t('recover')} ({recoveryCount})
-                </Button>
-              )}
-              {permission !== 'granted' && (
-                <Button 
-                  onClick={requestPermission}
-                  variant="outline"
-                  className="bg-white/10 text-white border-white/20 hover:bg-white/20 backdrop-blur-sm"
-                >
-                  <Bell className="w-4 h-4 mr-2" />
-                  Bật thông báo
-                </Button>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col items-center gap-3 bg-white/15 backdrop-blur-md rounded-2xl px-8 py-6 border border-white/30 shadow-xl">
-            <div className="flex items-center gap-3">
-              <Flame className="w-10 h-10 text-mai" />
-              <div>
-                <p className="text-sm text-white/80 font-medium">{t('streak')}</p>
-                <p className="text-4xl font-extrabold text-white">{streak} {t('days')}</p>
-              </div>
-            </div>
-            <p className="text-xs text-white/70 font-medium">{t('recoveryLeft')}: {recoveryCount}/3</p>
-          </div>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-orange-600">Dashboard</h1>
+          <p className="text-sm text-gray-500">Cố gắng hôm nay để mai nở hoa thành công 🌸</p>
         </div>
-      </Card>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Average Score Card */}
-        <Card className="p-6">
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg ${
-              moodData.color === "text-success" ? "bg-gradient-to-br from-success/20 to-success/40" :
-              moodData.color === "text-warning" ? "bg-gradient-to-br from-warning/20 to-warning/40" : "bg-gradient-to-br from-destructive/20 to-destructive/40"
-            }`}>
-              <MoodIcon className={`w-10 h-10 ${moodData.color}`} />
-            </div>
-            <p className="text-sm text-muted-foreground mb-1 font-medium">📈 Điểm trung bình</p>
-            <p className="text-4xl font-extrabold mb-2 text-foreground">{averageScore > 0 ? averageScore.toFixed(1) : '0.0'}/10</p>
-            <p className={`text-center font-semibold text-sm ${moodData.color}`}>
-              {moodData.message}
-            </p>
-          </div>
-        </Card>
-
-        {/* Study Time Card */}
-        <Card className="p-6">
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg bg-gradient-to-br from-primary/20 to-primary/40">
-              <ListTodo className="w-10 h-10 text-primary" />
-            </div>
-            <p className="text-sm text-muted-foreground mb-1 font-medium">⏰ Thời lượng học hôm nay</p>
-            <p className="text-4xl font-extrabold mb-2 text-foreground">{(studyTimeToday / 60).toFixed(1)}h</p>
-            <div className="w-full bg-muted rounded-full h-2 mt-2">
-              <div 
-                className="bg-primary h-2 rounded-full transition-all"
-                style={{ width: `${Math.min((studyTimeToday / 180) * 100, 100)}%` }}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-2">Mục tiêu: 3 giờ/ngày</p>
-          </div>
-        </Card>
-
-        {/* Schedule Progress Card */}
-        <Card className="p-6">
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg bg-gradient-to-br from-mai-light to-mai">
-              <CheckCircle2 className="w-10 h-10 text-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground mb-1 font-medium">🧩 Tiến độ lịch học</p>
-            <p className="text-4xl font-extrabold mb-2 text-foreground">
-              {scheduleProgress.completed}/{scheduleProgress.total}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {scheduleProgress.total > 0 
-                ? `${Math.round((scheduleProgress.completed / scheduleProgress.total) * 100)}% hoàn thành`
-                : "Chưa có lịch học"}
-            </p>
-          </div>
-        </Card>
-
-        {/* Latest Achievement Card */}
-        <Card className="p-6">
-          <div className="flex flex-col items-center justify-center h-full">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-3 shadow-lg bg-gradient-to-br from-warning/30 to-warning/50">
-              <Trophy className="w-10 h-10 text-warning" />
-            </div>
-            <p className="text-sm text-muted-foreground mb-1 font-medium">🏆 Thành tích gần đây</p>
-            {latestAchievement ? (
-              <>
-                <p className="text-lg font-extrabold text-foreground text-center">{latestAchievement.title}</p>
-                <p className="text-xs text-muted-foreground text-center mt-1">{latestAchievement.description}</p>
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">Chưa có thành tích</p>
-            )}
-          </div>
-        </Card>
+        <Button 
+          onClick={handleCheckIn}
+          disabled={!canCheckIn}
+          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-xl shadow-md"
+        >
+          {canCheckIn ? 'Check-in hôm nay' : 'Đã check-in'}
+        </Button>
       </div>
 
-      {/* Original Cards - Keep below for backward compatibility */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-mai-light to-mai flex items-center justify-center shadow-md">
-              <Calendar className="w-7 h-7 text-foreground" />
-            </div>
+      {/* Progress section - First row */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {/* Average Score Card */}
+        <div className="bg-orange-100 rounded-2xl p-5 shadow hover:shadow-lg transition cursor-pointer">
+          <h2 className="text-sm font-semibold text-gray-600">Điểm trung bình</h2>
+          <p className="text-4xl font-bold text-orange-600 mt-2">
+            {averageScore > 0 ? averageScore.toFixed(1) : '0.0'}/10
+          </p>
+          <p className={`text-xs mt-1 ${
+            averageScore >= 8 ? 'text-green-600' : 
+            averageScore >= 5 ? 'text-yellow-600' : 
+            'text-red-500'
+          }`}>
+            {averageScore >= 8 ? 'Tuyệt vời! 🎉' : 
+             averageScore >= 5 ? 'Cần cố gắng hơn nữa nhé 💪' : 
+             'Cần cố gắng hơn nữa nhé 💪'}
+          </p>
+        </div>
+
+        {/* Study Time Card */}
+        <div className="bg-pink-100 rounded-2xl p-5 shadow hover:shadow-lg transition cursor-pointer">
+          <h2 className="text-sm font-semibold text-gray-600">Thời lượng học hôm nay</h2>
+          <p className="text-4xl font-bold text-pink-600 mt-2">
+            {(studyTimeToday / 60).toFixed(1)}h
+          </p>
+          <p className="text-xs text-gray-500 mt-1">Mục tiêu: 3h/ngày</p>
+        </div>
+
+        {/* Schedule Progress Card */}
+        <div className="bg-yellow-100 rounded-2xl p-5 shadow hover:shadow-lg transition cursor-pointer">
+          <h2 className="text-sm font-semibold text-gray-600">Tiến độ lịch học</h2>
+          <p className="text-4xl font-bold text-yellow-600 mt-2">
+            {scheduleProgress.completed}/{scheduleProgress.total}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">
+            {scheduleProgress.total > 0 
+              ? `${Math.round((scheduleProgress.completed / scheduleProgress.total) * 100)}% hoàn thành`
+              : 'Chưa có lịch học'}
+          </p>
+        </div>
+      </div>
+
+      {/* Second row */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {/* Latest Achievement Card */}
+        <div className="bg-amber-100 rounded-2xl p-5 shadow hover:shadow-lg transition cursor-pointer">
+          <h2 className="text-sm font-semibold text-gray-600">Thành tích gần đây</h2>
+          {latestAchievement ? (
+            <>
+              <p className="text-2xl font-bold text-amber-600 mt-2">{latestAchievement.title}</p>
+              <p className="text-xs text-gray-500 mt-1">{latestAchievement.description}</p>
+            </>
+          ) : (
+            <>
+              <p className="text-4xl font-bold text-amber-600 mt-2">—</p>
+              <p className="text-xs text-gray-500 mt-1">Chưa có thành tích</p>
+            </>
+          )}
+        </div>
+
+        {/* Low Score Subjects Count */}
+        <div className="bg-rose-100 rounded-2xl p-5 shadow hover:shadow-lg transition cursor-pointer">
+          <h2 className="text-sm font-semibold text-gray-600">Môn điểm thấp</h2>
+          <p className="text-4xl font-bold text-rose-600 mt-2">{lowScoreSubjects.length}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {lowScoreSubjects.length > 0 ? 'Cần ôn tập thêm' : 'Chưa có dữ liệu'}
+          </p>
+        </div>
+
+        {/* Streak Card */}
+        <div className="bg-gradient-to-r from-orange-300 to-pink-300 text-white rounded-2xl p-5 shadow-lg">
+          <h2 className="text-lg font-semibold">🌷 Mùa Xuân Rực Rỡ – Học Tập Thăng Hoa!</h2>
+          <p className="text-sm mt-2">
+            Chuỗi liên tục: <span className="font-bold">{streak} ngày</span>
+          </p>
+          <div className="flex gap-2 mt-3">
+            <button 
+              className="bg-white text-orange-600 px-3 py-1 rounded-lg shadow hover:bg-orange-50 text-sm font-medium"
+            >
+              Xem chuỗi học
+            </button>
+            {streak === 0 && streakData && streakData.longest_streak > 0 && recoveryCount > 0 && (
+              <button
+                onClick={handleRecoverStreak}
+                className="bg-white/20 text-white px-3 py-1 rounded-lg shadow hover:bg-white/30 text-sm font-medium border border-white/30"
+              >
+                Khôi phục ({recoveryCount})
+              </button>
+            )}
+            {permission !== 'granted' && (
+              <button
+                onClick={requestPermission}
+                className="bg-white/20 text-white px-3 py-1 rounded-lg shadow hover:bg-white/30 text-sm font-medium border border-white/30"
+              >
+                Bật thông báo
+              </button>
+            )}
           </div>
-          <p className="text-sm text-muted-foreground mb-1 font-medium">📅 Lịch học hôm nay</p>
-          <p className="text-3xl font-extrabold mb-2 text-foreground">{todaySchedule.length}</p>
-          <div className="mt-3 space-y-2 max-h-32 overflow-y-auto">
-            {todaySchedule.length > 0 ? (
-              todaySchedule.map((item: any, idx: number) => (
-                <div key={idx} className="flex items-start gap-2 text-sm border-l-2 border-mai pl-3 py-1">
+        </div>
+      </div>
+
+      {/* Calendar + Schedule */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Today's Schedule */}
+        <div className="bg-white p-6 rounded-2xl shadow-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">📅 Lịch học hôm nay</h2>
+          {todaySchedule.length > 0 ? (
+            <div className="space-y-2">
+              {todaySchedule.map((item: any, idx: number) => (
+                <div key={idx} className="flex items-start gap-2 text-sm border-l-2 border-orange-400 pl-3 py-1">
                   <div className="flex flex-col flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground">{item.subject}</span>
-                      {item.completed && <CheckCircle2 className="w-4 h-4 text-success" />}
+                      <span className="font-semibold text-gray-700">{item.subject}</span>
+                      {item.completed && <CheckCircle2 className="w-4 h-4 text-green-600" />}
                     </div>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-gray-500">
                       {item.time}
-                      {item.type === "extra" && item.session && ` • ${item.session}`}
-                      {item.type === "school" && item.period && ` • ${item.period}`}
                     </span>
                   </div>
                 </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">Chưa có dữ liệu</p>
-            )}
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-destructive/20 to-destructive/40 flex items-center justify-center shadow-md">
-              <AlertCircle className="w-7 h-7 text-destructive" />
+              ))}
             </div>
-          </div>
-          <p className="text-sm text-muted-foreground mb-1 font-medium">Môn điểm thấp</p>
-          <p className="text-3xl font-extrabold mb-2 text-foreground">{lowScoreSubjects.length}</p>
-          <div className="mt-3 space-y-2">
-            {lowScoreSubjects.length > 0 ? (
-              lowScoreSubjects.slice(0, 2).map((item: any, idx: number) => {
-                const scoresObj = (item.scores || {}) as ScoresObj;
+          ) : (
+            <p className="text-sm text-gray-500">Chưa có dữ liệu</p>
+          )}
+        </div>
+
+        {/* Subjects Need More Study */}
+        <div className="bg-white p-6 rounded-2xl shadow-md">
+          <h2 className="text-lg font-semibold text-gray-700 mb-4">🧠 Môn cần học nhiều hơn</h2>
+          {lowScoreSubjects.length > 0 ? (
+            <ul className="list-disc list-inside text-gray-600 space-y-1">
+              {lowScoreSubjects.map((subject, index) => {
+                const scoresObj = (subject.scores || {}) as ScoresObj;
                 const tx1 = scoresObj.tx1 || 0;
                 const tx2 = scoresObj.tx2 || 0;
                 const tx3 = scoresObj.tx3 || 0;
@@ -646,71 +560,20 @@ const Dashboard = () => {
                 const gk = scoresObj.gk || 0;
                 const ck = scoresObj.ck || 0;
                 const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
-                const subjectAvg = hasScores ? ((tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3)) / 10) : 0;
+                const avg = hasScores ? ((tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3)) / 10) : 0;
                 
                 return (
-                  <div key={idx} className="flex items-center justify-between text-sm border-l-2 border-destructive/40 pl-3 py-1">
-                    <span className="font-semibold">{item.subject}</span>
-                    <span className="text-destructive font-bold">{subjectAvg.toFixed(1)}</span>
-                  </div>
+                  <li key={index} className="flex justify-between items-center">
+                    <span>{subject.subject}</span>
+                    <span className="text-rose-600 font-semibold text-sm">{avg.toFixed(1)}</span>
+                  </li>
                 );
-              })
-            ) : (
-              <p className="text-sm text-muted-foreground">Chưa có dữ liệu</p>
-            )}
-          </div>
-        </Card>
-
-      </div>
-
-      {/* Activities Section */}
-      <div className="grid grid-cols-1 gap-6">
-
-      {/* Subjects Need More Study */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold">Môn cần học nhiều hơn</h3>
-        </div>
-
-        <div className="space-y-4">
-          {lowScoreSubjects.length > 0 ? (
-            lowScoreSubjects.map((subject, index) => {
-              const scoresObj = (subject.scores || {}) as ScoresObj;
-              const tx1 = scoresObj.tx1 || 0;
-              const tx2 = scoresObj.tx2 || 0;
-              const tx3 = scoresObj.tx3 || 0;
-              const tx4 = scoresObj.tx4 || 0;
-              const tx5 = scoresObj.tx5 || 0;
-              const gk = scoresObj.gk || 0;
-              const ck = scoresObj.ck || 0;
-              const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
-              const avg = hasScores ? ((tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3)) / 10) : 0;
-              
-              return (
-                <div key={index} className="flex items-center justify-between p-4 rounded-xl border-2 border-destructive/30 bg-destructive/5 hover:bg-destructive/10 transition-all hover:shadow-md">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-destructive/20 to-destructive/40 flex items-center justify-center shadow-sm">
-                      <AlertCircle className="w-6 h-6 text-destructive" />
-                    </div>
-                  <div>
-                    <h4 className="font-bold text-lg">{subject.subject}</h4>
-                    <p className="text-sm text-muted-foreground font-medium">Điểm trung bình: {avg.toFixed(1)}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-destructive">Cần ôn tập thêm</p>
-                  <p className="text-xs text-muted-foreground font-medium">Lớp {subject.grade} - HK {subject.semester}</p>
-                </div>
-                </div>
-              );
-            })
+              })}
+            </ul>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <p className="text-lg text-muted-foreground font-medium">Chưa có dữ liệu</p>
-            </div>
+            <p className="text-sm text-gray-500">Chưa có môn nào cần ôn tập đặc biệt</p>
           )}
         </div>
-      </Card>
       </div>
     </div>
   );
