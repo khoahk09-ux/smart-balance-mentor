@@ -41,6 +41,30 @@ export type Database = {
         }
         Relationships: []
       }
+      checkin: {
+        Row: {
+          created_at: string | null
+          id: number
+          ngay: string
+          trangthai: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          ngay?: string
+          trangthai?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          ngay?: string
+          trangthai?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_review_stats: {
         Row: {
           created_at: string
@@ -71,6 +95,33 @@ export type Database = {
         }
         Relationships: []
       }
+      diemso: {
+        Row: {
+          created_at: string | null
+          diem: number
+          id: number
+          mon_hoc: string
+          ngay_cap_nhat: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          diem: number
+          id?: number
+          mon_hoc: string
+          ngay_cap_nhat?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          diem?: number
+          id?: number
+          mon_hoc?: string
+          ngay_cap_nhat?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       grades: {
         Row: {
           created_at: string
@@ -91,6 +142,36 @@ export type Database = {
           id?: string
           score?: number
           subject?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lichhoc: {
+        Row: {
+          created_at: string | null
+          id: number
+          mon_hoc: string
+          ngay: string
+          thoiluong: number
+          trangthai: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          mon_hoc: string
+          ngay: string
+          thoiluong: number
+          trangthai?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          mon_hoc?: string
+          ngay?: string
+          thoiluong?: number
+          trangthai?: string
           user_id?: string
         }
         Relationships: []
@@ -368,6 +449,30 @@ export type Database = {
           session_date?: string
           subject?: string | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      thanhtich: {
+        Row: {
+          created_at: string | null
+          id: number
+          ngay: string
+          ten_thanhtich: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          ngay?: string
+          ten_thanhtich: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          ngay?: string
+          ten_thanhtich?: string
           user_id?: string
         }
         Relationships: []

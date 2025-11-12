@@ -59,6 +59,12 @@ const Dashboard = () => {
   const [scheduleProgress, setScheduleProgress] = useState({ completed: 0, total: 0 });
   const [latestAchievement, setLatestAchievement] = useState<any>(null);
   const [newTask, setNewTask] = useState({ subject: '', task: '' });
+  
+  // New state for database tables
+  const [diemso, setDiemso] = useState<any[]>([]);
+  const [lichhoc, setLichhoc] = useState<any[]>([]);
+  const [thanhtich, setThanhtich] = useState<any[]>([]);
+  const [checkin, setCheckin] = useState<any[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -255,9 +261,57 @@ const Dashboard = () => {
 
       // Calculate access frequency (số lần truy cập trong 7 ngày qua)
       setAccessFrequency(5); // Mock data, có thể implement tracking thực tế
+      
+      // Fetch data from new tables
+      await fetchNewTableData();
     };
     
     loadData();
+    
+    // Set up 10-second refresh interval
+    const refreshInterval = setInterval(() => {
+      if (user) fetchNewTableData();
+    }, 10000);
+    
+    // Set up realtime subscriptions
+    const channels: any[] = [];
+    
+    const diemsoChannel = supabase
+      .channel('diemso-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'diemso' }, () => {
+        fetchNewTableData();
+      })
+      .subscribe();
+    channels.push(diemsoChannel);
+    
+    const lichhocChannel = supabase
+      .channel('lichhoc-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'lichhoc' }, () => {
+        fetchNewTableData();
+      })
+      .subscribe();
+    channels.push(lichhocChannel);
+    
+    const thanhtichChannel = supabase
+      .channel('thanhtich-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'thanhtich' }, () => {
+        fetchNewTableData();
+      })
+      .subscribe();
+    channels.push(thanhtichChannel);
+    
+    const checkinChannel = supabase
+      .channel('checkin-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'checkin' }, () => {
+        fetchNewTableData();
+      })
+      .subscribe();
+    channels.push(checkinChannel);
+    
+    return () => {
+      clearInterval(refreshInterval);
+      channels.forEach(channel => supabase.removeChannel(channel));
+    };
   }, [user, selectedGrade, selectedSemester]);
 
   // Check for upcoming classes every minute
@@ -297,6 +351,81 @@ const Dashboard = () => {
 
     return () => clearInterval(interval);
   }, [user, permission, todaySchedule, notifiedClasses, notifyUpcomingClass]);
+
+  // Fetch data from new tables
+  const fetchNewTableData = async () => {
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (!currentUser) return;
+
+      // Fetch diemso
+      const { data: diemsoData } = await supabase
+        .from('diemso')
+        .select('*')
+        .eq('user_id', currentUser.id);
+      if (diemsoData) setDiemso(diemsoData);
+
+      // Fetch lichhoc for today
+      const today = new Date().toISOString().split('T')[0];
+      const { data: lichhocData } = await supabase
+        .from('lichhoc')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .eq('ngay', today);
+      if (lichhocData) setLichhoc(lichhocData);
+
+      // Fetch thanhtich
+      const { data: thanhtichData } = await supabase
+        .from('thanhtich')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('ngay', { ascending: false });
+      if (thanhtichData) setThanhtich(thanhtichData);
+
+      // Fetch checkin
+      const { data: checkinData } = await supabase
+        .from('checkin')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('ngay', { ascending: false });
+      if (checkinData) setCheckin(checkinData);
+    } catch (error) {
+      console.error('Error fetching new table data:', error);
+    }
+  };
+  
+  // Calculate metrics from new tables
+  const avgDiemso = diemso.length > 0 
+    ? diemso.reduce((sum, item) => sum + item.diem, 0) / diemso.length
+    : 0;
+  
+  const todayDuration = lichhoc.reduce((sum, item) => sum + (item.thoiluong || 0), 0);
+  
+  const completedLessonsLichhoc = lichhoc.filter(item => item.trangthai === 'hoàn thành').length;
+  const totalLessonsLichhoc = lichhoc.length;
+  
+  const latestThanhtich = thanhtich.length > 0 ? thanhtich[0] : null;
+  
+  const lowScoreDiemso = diemso.filter(item => item.diem < 6.5);
+  
+  const needStudySubjects = diemso.filter(item => item.diem < avgDiemso);
+  
+  // Calculate continuous check-in streak
+  const continuousStreakCalc = () => {
+    let streakCount = 0;
+    const sortedCheckins = [...checkin].sort((a, b) => 
+      new Date(b.ngay).getTime() - new Date(a.ngay).getTime()
+    );
+    
+    for (let i = 0; i < sortedCheckins.length; i++) {
+      if (sortedCheckins[i].trangthai) {
+        streakCount++;
+      } else {
+        break;
+      }
+    }
+    return streakCount;
+  };
 
   // Helper function to get period time
   const getPeriodTime = (period: string): string => {
@@ -529,15 +658,15 @@ const Dashboard = () => {
         <div className="bg-orange-100 rounded-2xl p-5 shadow hover:shadow-lg transition cursor-pointer">
           <h2 className="text-sm font-semibold text-gray-600">Điểm trung bình</h2>
           <p className="text-4xl font-bold text-orange-600 mt-2">
-            {averageScore > 0 ? averageScore.toFixed(1) : '0.0'}/10
+            {diemso.length > 0 ? avgDiemso.toFixed(1) : (averageScore > 0 ? averageScore.toFixed(1) : '0.0')}/10
           </p>
           <p className={`text-xs mt-1 ${
-            averageScore >= 8 ? 'text-green-600' : 
-            averageScore >= 5 ? 'text-yellow-600' : 
+            (diemso.length > 0 ? avgDiemso : averageScore) >= 8 ? 'text-green-600' : 
+            (diemso.length > 0 ? avgDiemso : averageScore) >= 5 ? 'text-yellow-600' : 
             'text-red-500'
           }`}>
-            {averageScore >= 8 ? 'Tuyệt vời! 🎉' : 
-             averageScore >= 5 ? 'Cần cố gắng hơn nữa nhé 💪' : 
+            {(diemso.length > 0 ? avgDiemso : averageScore) >= 8 ? 'Tuyệt vời! 🎉' : 
+             (diemso.length > 0 ? avgDiemso : averageScore) >= 5 ? 'Cần cố gắng hơn nữa nhé 💪' : 
              'Cần cố gắng hơn nữa nhé 💪'}
           </p>
         </div>
@@ -546,7 +675,7 @@ const Dashboard = () => {
         <div className="bg-pink-100 rounded-2xl p-5 shadow hover:shadow-lg transition cursor-pointer">
           <h2 className="text-sm font-semibold text-gray-600">Thời lượng học hôm nay</h2>
           <p className="text-4xl font-bold text-pink-600 mt-2">
-            {(studyTimeToday / 60).toFixed(1)}h
+            {lichhoc.length > 0 ? todayDuration.toFixed(1) : (studyTimeToday / 60).toFixed(1)}h
           </p>
           <p className="text-xs text-gray-500 mt-1">Mục tiêu: 3h/ngày</p>
         </div>
@@ -555,11 +684,11 @@ const Dashboard = () => {
         <div className="bg-yellow-100 rounded-2xl p-5 shadow hover:shadow-lg transition cursor-pointer">
           <h2 className="text-sm font-semibold text-gray-600">Tiến độ lịch học</h2>
           <p className="text-4xl font-bold text-yellow-600 mt-2">
-            {scheduleProgress.completed}/{scheduleProgress.total}
+            {lichhoc.length > 0 ? `${completedLessonsLichhoc}/${totalLessonsLichhoc}` : `${scheduleProgress.completed}/${scheduleProgress.total}`}
           </p>
           <p className="text-xs text-gray-500 mt-1">
-            {scheduleProgress.total > 0 
-              ? `${Math.round((scheduleProgress.completed / scheduleProgress.total) * 100)}% hoàn thành`
+            {(lichhoc.length > 0 ? totalLessonsLichhoc : scheduleProgress.total) > 0 
+              ? `${Math.round(((lichhoc.length > 0 ? completedLessonsLichhoc : scheduleProgress.completed) / (lichhoc.length > 0 ? totalLessonsLichhoc : scheduleProgress.total)) * 100)}% hoàn thành`
               : 'Chưa có lịch học'}
           </p>
         </div>
@@ -570,10 +699,16 @@ const Dashboard = () => {
         {/* Latest Achievement Card */}
         <div className="bg-amber-100 rounded-2xl p-5 shadow hover:shadow-lg transition cursor-pointer">
           <h2 className="text-sm font-semibold text-gray-600">Thành tích gần đây</h2>
-          {latestAchievement ? (
+          {(latestThanhtich || latestAchievement) ? (
             <>
-              <p className="text-2xl font-bold text-amber-600 mt-2">{latestAchievement.title}</p>
-              <p className="text-xs text-gray-500 mt-1">{latestAchievement.description}</p>
+              <p className="text-2xl font-bold text-amber-600 mt-2">
+                {latestThanhtich ? latestThanhtich.ten_thanhtich : latestAchievement.title}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {latestThanhtich 
+                  ? new Date(latestThanhtich.ngay).toLocaleDateString('vi-VN')
+                  : latestAchievement.description}
+              </p>
             </>
           ) : (
             <>
@@ -586,9 +721,11 @@ const Dashboard = () => {
         {/* Low Score Subjects Count */}
         <div className="bg-rose-100 rounded-2xl p-5 shadow hover:shadow-lg transition cursor-pointer">
           <h2 className="text-sm font-semibold text-gray-600">Môn điểm thấp</h2>
-          <p className="text-4xl font-bold text-rose-600 mt-2">{lowScoreSubjects.length}</p>
+          <p className="text-4xl font-bold text-rose-600 mt-2">
+            {lowScoreDiemso.length > 0 ? lowScoreDiemso.length : lowScoreSubjects.length}
+          </p>
           <p className="text-xs text-gray-500 mt-1">
-            {lowScoreSubjects.length > 0 ? 'Cần ôn tập thêm' : 'Chưa có dữ liệu'}
+            {(lowScoreDiemso.length > 0 || lowScoreSubjects.length > 0) ? 'Cần ôn tập thêm' : 'Chưa có dữ liệu'}
           </p>
         </div>
 
@@ -596,7 +733,7 @@ const Dashboard = () => {
         <div className="bg-gradient-to-r from-orange-300 to-pink-300 text-white rounded-2xl p-5 shadow-lg">
           <h2 className="text-lg font-semibold">🌷 Mùa Xuân Rực Rỡ – Học Tập Thăng Hoa!</h2>
           <p className="text-sm mt-2">
-            Chuỗi liên tục: <span className="font-bold">{streak} ngày</span>
+            Chuỗi liên tục: <span className="font-bold">{checkin.length > 0 ? continuousStreakCalc() : streak} ngày</span>
           </p>
           <div className="flex gap-2 mt-3">
             <button 
@@ -655,6 +792,31 @@ const Dashboard = () => {
           </div>
 
           {/* Task List */}
+          {lichhoc.length > 0 ? (
+            <div className="space-y-3 mb-4">
+              <h3 className="text-sm font-medium text-gray-700">Từ database lichhoc:</h3>
+              {lichhoc.map((item) => (
+                <div key={item.id} className="p-3 bg-blue-50 rounded-lg">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="font-medium text-gray-800">{item.mon_hoc}</span>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Thời lượng: {item.thoiluong}h
+                      </p>
+                    </div>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      item.trangthai === 'hoàn thành' 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-yellow-100 text-yellow-700'
+                    }`}>
+                      {item.trangthai}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          
           {todaySchedule.length > 0 ? (
             <div className="space-y-2">
               {todaySchedule.map((item: any) => (
@@ -679,39 +841,56 @@ const Dashboard = () => {
                 </div>
               ))}
             </div>
-          ) : (
+          ) : lichhoc.length === 0 ? (
             <p className="text-sm text-gray-500">Chưa có dữ liệu</p>
-          )}
+          ) : null}
         </div>
 
         {/* Subjects Need More Study */}
         <div className="bg-white p-6 rounded-2xl shadow-md">
           <h2 className="text-lg font-semibold text-gray-700 mb-4">🧠 Môn cần học nhiều hơn</h2>
-          {lowScoreSubjects.length > 0 ? (
-            <ul className="list-disc list-inside text-gray-600 space-y-1">
-              {lowScoreSubjects.map((subject, index) => {
-                const scoresObj = (subject.scores || {}) as ScoresObj;
-                const tx1 = scoresObj.tx1 || 0;
-                const tx2 = scoresObj.tx2 || 0;
-                const tx3 = scoresObj.tx3 || 0;
-                const tx4 = scoresObj.tx4 || 0;
-                const tx5 = scoresObj.tx5 || 0;
-                const gk = scoresObj.gk || 0;
-                const ck = scoresObj.ck || 0;
-                const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
-                const avg = hasScores ? ((tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3)) / 10) : 0;
-                
-                return (
+          {needStudySubjects.length > 0 ? (
+            <>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Từ database diemso:</h3>
+              <ul className="list-disc list-inside text-gray-600 space-y-1 mb-4">
+                {needStudySubjects.map((item, index) => (
                   <li key={index} className="flex justify-between items-center">
-                    <span>{subject.subject}</span>
-                    <span className="text-rose-600 font-semibold text-sm">{avg.toFixed(1)}</span>
+                    <span>{item.mon_hoc}</span>
+                    <span className="text-rose-600 font-semibold text-sm">{item.diem.toFixed(1)}</span>
                   </li>
-                );
-              })}
-            </ul>
-          ) : (
+                ))}
+              </ul>
+            </>
+          ) : null}
+          
+          {lowScoreSubjects.length > 0 ? (
+            <>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Từ user_scores:</h3>
+              <ul className="list-disc list-inside text-gray-600 space-y-1">
+                {lowScoreSubjects.map((subject, index) => {
+                  const scoresObj = (subject.scores || {}) as ScoresObj;
+                  const tx1 = scoresObj.tx1 || 0;
+                  const tx2 = scoresObj.tx2 || 0;
+                  const tx3 = scoresObj.tx3 || 0;
+                  const tx4 = scoresObj.tx4 || 0;
+                  const tx5 = scoresObj.tx5 || 0;
+                  const gk = scoresObj.gk || 0;
+                  const ck = scoresObj.ck || 0;
+                  const hasScores = tx1 || tx2 || tx3 || tx4 || tx5 || gk || ck;
+                  const avg = hasScores ? ((tx1 + tx2 + tx3 + tx4 + tx5 + (gk * 2) + (ck * 3)) / 10) : 0;
+                  
+                  return (
+                    <li key={index} className="flex justify-between items-center">
+                      <span>{subject.subject}</span>
+                      <span className="text-rose-600 font-semibold text-sm">{avg.toFixed(1)}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          ) : needStudySubjects.length === 0 ? (
             <p className="text-sm text-gray-500">Chưa có môn nào cần ôn tập đặc biệt</p>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
