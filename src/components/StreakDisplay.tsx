@@ -188,38 +188,21 @@ const StreakDisplay = ({
   );
 };
 
-// Flame SVG Component - Purple/Pink flame with glow effect
+// Flame SVG Component - Simple drop-shaped flame
 function FlameSVG({ className = "w-12 h-12" }: { className?: string }) {
   return (
     <svg 
-      viewBox="0 0 100 120" 
+      viewBox="0 0 100 140" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg" 
       className={className}
     >
-      {/* Outer glow layer with animation */}
+      {/* Main flame body - simple teardrop shape */}
       <motion.path 
-        d="M50 110C50 110 70 95 75 75C78 62 72 50 70 35C68 25 62 20 60 10C60 10 55 18 50 22C45 18 40 10 40 10C38 20 32 25 30 35C28 50 22 62 25 75C30 95 50 110 50 110Z" 
-        fill="url(#flameGlow)" 
-        opacity="0.6"
-        filter="url(#glow)"
-        animate={{
-          scale: [1, 1.08, 1.02, 1.06, 1],
-          opacity: [0.6, 0.7, 0.55, 0.65, 0.6]
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-      
-      {/* Main flame body with flicker */}
-      <motion.path 
-        d="M50 105C50 105 68 92 72 75C75 63 70 52 68 40C66 32 61 28 59 18C59 18 55 24 50 27C45 24 41 18 41 18C39 28 34 32 32 40C30 52 25 63 28 75C32 92 50 105 50 105Z" 
+        d="M 50 20 C 50 20 30 40 30 70 C 30 95 38 115 50 115 C 62 115 70 95 70 70 C 70 40 50 20 50 20 Z"
         fill="url(#flameMain)"
         animate={{
-          scale: [1, 1.04, 0.99, 1.02, 1],
+          scale: [1, 1.03, 0.98, 1.02, 1],
         }}
         transition={{
           duration: 1.8,
@@ -228,28 +211,12 @@ function FlameSVG({ className = "w-12 h-12" }: { className?: string }) {
         }}
       />
       
-      {/* Inner highlight with subtle movement */}
+      {/* Inner bright core */}
       <motion.path 
-        d="M50 95C50 95 62 85 65 72C67 63 64 55 62 47C61 42 57 39 56 32C56 32 53 36 50 38C47 36 44 32 44 32C43 39 39 42 38 47C36 55 33 63 35 72C38 85 50 95 50 95Z" 
-        fill="url(#flameHighlight)" 
-        opacity="0.8"
-        animate={{
-          scale: [1, 1.06, 1.01, 1.04, 1],
-          y: [0, -1, 0, -0.5, 0]
-        }}
-        transition={{
-          duration: 1.6,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-      
-      {/* Core bright center with intense flicker */}
-      <motion.path 
-        d="M50 85C50 85 58 78 60 68C61 62 59 57 58 52C57 48 55 46 54 42C54 42 52 44 50 45C48 44 46 42 46 42C45 46 43 48 42 52C41 57 39 62 40 68C42 78 50 85 50 85Z" 
+        d="M 50 45 C 50 45 42 55 42 72 C 42 85 45 95 50 95 C 55 95 58 85 58 72 C 58 55 50 45 50 45 Z"
         fill="url(#flameCore)"
         animate={{
-          scale: [1, 1.1, 0.95, 1.08, 1],
+          scale: [1, 1.08, 0.96, 1.05, 1],
           opacity: [1, 0.9, 1, 0.95, 1],
           y: [0, -2, 0, -1, 0]
         }}
@@ -261,45 +228,20 @@ function FlameSVG({ className = "w-12 h-12" }: { className?: string }) {
       />
       
       <defs>
-        {/* Glow gradient - outermost */}
-        <radialGradient id="flameGlow" cx="50%" cy="50%">
-          <stop offset="0%" stopColor="#FF1493" stopOpacity="0.8" />
-          <stop offset="50%" stopColor="#9B5DE5" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#6B35FF" stopOpacity="0.2" />
-        </radialGradient>
-        
-        {/* Main flame gradient */}
+        {/* Main flame gradient - pink to purple */}
         <linearGradient id="flameMain" x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%" stopColor="#FFD700" />
-          <stop offset="20%" stopColor="#FF1493" />
-          <stop offset="50%" stopColor="#9B5DE5" />
-          <stop offset="100%" stopColor="#6B35FF" />
-        </linearGradient>
-        
-        {/* Inner highlight gradient */}
-        <linearGradient id="flameHighlight" x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%" stopColor="#FFF4E0" />
-          <stop offset="30%" stopColor="#FFB4E6" />
-          <stop offset="70%" stopColor="#C77DFF" />
+          <stop offset="0%" stopColor="#FF6B9D" />
+          <stop offset="50%" stopColor="#C74B8C" />
           <stop offset="100%" stopColor="#9B5DE5" />
         </linearGradient>
         
-        {/* Core bright gradient */}
-        <radialGradient id="flameCore" cx="50%" cy="40%">
+        {/* Core bright gradient - white to purple */}
+        <radialGradient id="flameCore" cx="50%" cy="50%">
           <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="40%" stopColor="#FFE4F8" />
-          <stop offset="80%" stopColor="#FFB4E6" />
-          <stop offset="100%" stopColor="#FF1493" />
+          <stop offset="30%" stopColor="#E4B5FF" />
+          <stop offset="70%" stopColor="#B991FF" />
+          <stop offset="100%" stopColor="#8B5CF6" />
         </radialGradient>
-        
-        {/* Glow filter */}
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-          <feMerge>
-            <feMergeNode in="coloredBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
       </defs>
     </svg>
   );
