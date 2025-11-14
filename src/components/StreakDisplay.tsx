@@ -188,60 +188,145 @@ const StreakDisplay = ({
   );
 };
 
-// Flame SVG Component - Simple drop-shaped flame
+// Flame SVG Component - Fire emoji style
 function FlameSVG({ className = "w-12 h-12" }: { className?: string }) {
   return (
     <svg 
-      viewBox="0 0 100 140" 
+      viewBox="0 0 120 140" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg" 
       className={className}
     >
-      {/* Main flame body - simple teardrop shape */}
+      {/* Main body - yellow base */}
       <motion.path 
-        d="M 50 20 C 50 20 30 40 30 70 C 30 95 38 115 50 115 C 62 115 70 95 70 70 C 70 40 50 20 50 20 Z"
-        fill="url(#flameMain)"
+        d="M 60 120 C 75 120 90 110 90 90 C 90 75 85 65 80 55 C 75 45 70 40 65 30 C 62 40 58 45 52 55 C 48 62 45 70 42 80 C 40 85 35 90 35 95 C 35 110 45 120 60 120 Z"
+        fill="url(#yellowBase)"
         animate={{
-          scale: [1, 1.03, 0.98, 1.02, 1],
+          scale: [1, 1.02, 0.99, 1.01, 1],
         }}
         transition={{
-          duration: 1.8,
+          duration: 1.5,
           repeat: Infinity,
           ease: "easeInOut"
         }}
       />
       
-      {/* Inner bright core */}
+      {/* Orange middle layer */}
       <motion.path 
-        d="M 50 45 C 50 45 42 55 42 72 C 42 85 45 95 50 95 C 55 95 58 85 58 72 C 58 55 50 45 50 45 Z"
-        fill="url(#flameCore)"
+        d="M 60 110 C 70 110 80 102 80 88 C 80 78 76 70 72 62 C 68 54 65 50 62 42 C 60 48 57 52 53 60 C 50 66 47 72 45 78 C 44 82 42 85 42 88 C 42 100 50 110 60 110 Z"
+        fill="url(#orangeMiddle)"
         animate={{
-          scale: [1, 1.08, 0.96, 1.05, 1],
-          opacity: [1, 0.9, 1, 0.95, 1],
-          y: [0, -2, 0, -1, 0]
+          scale: [1, 1.04, 0.98, 1.02, 1],
         }}
         transition={{
-          duration: 1.2,
+          duration: 1.3,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      
+      {/* Red inner layer */}
+      <motion.path 
+        d="M 60 95 C 67 95 72 90 72 80 C 72 72 69 66 66 60 C 64 55 62 52 60 46 C 58 51 56 54 54 59 C 52 64 50 68 49 73 C 48 76 48 78 48 80 C 48 88 53 95 60 95 Z"
+        fill="url(#redInner)"
+        animate={{
+          scale: [1, 1.06, 0.97, 1.03, 1],
+          y: [0, -1, 0, -0.5, 0]
+        }}
+        transition={{
+          duration: 1.1,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      
+      {/* Left dancing flame */}
+      <motion.path 
+        d="M 35 65 C 35 65 30 55 32 48 C 33 45 35 43 36 40 C 36 43 38 45 40 50 C 41 53 42 57 42 60 C 42 65 38 68 35 65 Z"
+        fill="url(#yellowFlame)"
+        animate={{
+          scale: [1, 1.1, 0.95, 1.05, 1],
+          x: [-1, 1, -0.5, 0.5, -1],
+          rotate: [-5, 5, -3, 3, -5]
+        }}
+        transition={{
+          duration: 0.9,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      
+      {/* Right dancing flame */}
+      <motion.path 
+        d="M 85 55 C 85 55 88 47 87 42 C 86 39 84 37 83 35 C 84 37 84 40 83 44 C 82 47 81 51 80 54 C 79 58 82 59 85 55 Z"
+        fill="url(#orangeFlame)"
+        animate={{
+          scale: [1, 1.08, 0.97, 1.04, 1],
+          x: [1, -1, 0.5, -0.5, 1],
+          rotate: [5, -5, 3, -3, 5]
+        }}
+        transition={{
+          duration: 1.0,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      
+      {/* Top center spark */}
+      <motion.path 
+        d="M 58 35 C 58 35 56 30 57 27 C 57.5 25.5 58.5 24.5 59 23 C 59 24.5 59.5 25.5 59.5 28 C 59.5 30 59.5 32 59 33 C 58.5 35 58 35 58 35 Z"
+        fill="url(#redFlame)"
+        animate={{
+          scale: [1, 1.15, 0.9, 1.1, 1],
+          y: [-2, 1, -1, 0.5, -2],
+          opacity: [1, 0.8, 1, 0.9, 1]
+        }}
+        transition={{
+          duration: 0.8,
           repeat: Infinity,
           ease: "easeInOut"
         }}
       />
       
       <defs>
-        {/* Main flame gradient - pink to purple */}
-        <linearGradient id="flameMain" x1="50%" y1="0%" x2="50%" y2="100%">
-          <stop offset="0%" stopColor="#FF6B9D" />
-          <stop offset="50%" stopColor="#C74B8C" />
-          <stop offset="100%" stopColor="#9B5DE5" />
+        {/* Yellow base gradient */}
+        <linearGradient id="yellowBase" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor="#FFF700" />
+          <stop offset="50%" stopColor="#FFED4E" />
+          <stop offset="100%" stopColor="#FFC837" />
         </linearGradient>
         
-        {/* Core bright gradient - white to purple */}
-        <radialGradient id="flameCore" cx="50%" cy="50%">
-          <stop offset="0%" stopColor="#FFFFFF" />
-          <stop offset="30%" stopColor="#E4B5FF" />
-          <stop offset="70%" stopColor="#B991FF" />
-          <stop offset="100%" stopColor="#8B5CF6" />
-        </radialGradient>
+        {/* Orange middle gradient */}
+        <linearGradient id="orangeMiddle" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor="#FF9500" />
+          <stop offset="50%" stopColor="#FF8C00" />
+          <stop offset="100%" stopColor="#FF7F00" />
+        </linearGradient>
+        
+        {/* Red inner gradient */}
+        <linearGradient id="redInner" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor="#FF4500" />
+          <stop offset="50%" stopColor="#FF3800" />
+          <stop offset="100%" stopColor="#E63900" />
+        </linearGradient>
+        
+        {/* Yellow flame for sparks */}
+        <linearGradient id="yellowFlame" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor="#FFEB3B" />
+          <stop offset="100%" stopColor="#FFC107" />
+        </linearGradient>
+        
+        {/* Orange flame for sparks */}
+        <linearGradient id="orangeFlame" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor="#FF9800" />
+          <stop offset="100%" stopColor="#FF5722" />
+        </linearGradient>
+        
+        {/* Red flame for top spark */}
+        <linearGradient id="redFlame" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor="#FF6B35" />
+          <stop offset="100%" stopColor="#F7931E" />
+        </linearGradient>
       </defs>
     </svg>
   );
