@@ -58,6 +58,8 @@ const Index = () => {
         return <ScheduleTable />;
       case "achievements":
         return <Achievements />;
+      case "aichat":
+        return <AIChat />;
       case "profile":
         return (
           <div className="p-6 max-w-2xl">
