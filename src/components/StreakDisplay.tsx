@@ -175,25 +175,82 @@ const StreakDisplay = ({
   );
 };
 
-// Flame SVG Component
+// Flame SVG Component - Purple/Pink flame with glow effect
 function FlameSVG({ className = "w-12 h-12" }: { className?: string }) {
   return (
     <svg 
-      viewBox="0 0 64 64" 
+      viewBox="0 0 100 120" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg" 
       className={className}
     >
+      {/* Outer glow layer */}
       <path 
-        d="M32 58C32 58 44 47 44 34C44 22 34 18 34 10C34 10 30 18 22 22C22 22 26 30 26 36C26 50 32 58 32 58Z" 
-        fill="url(#flameGradient)" 
+        d="M50 110C50 110 70 95 75 75C78 62 72 50 70 35C68 25 62 20 60 10C60 10 55 18 50 22C45 18 40 10 40 10C38 20 32 25 30 35C28 50 22 62 25 75C30 95 50 110 50 110Z" 
+        fill="url(#flameGlow)" 
+        opacity="0.6"
+        filter="url(#glow)"
       />
+      
+      {/* Main flame body */}
+      <path 
+        d="M50 105C50 105 68 92 72 75C75 63 70 52 68 40C66 32 61 28 59 18C59 18 55 24 50 27C45 24 41 18 41 18C39 28 34 32 32 40C30 52 25 63 28 75C32 92 50 105 50 105Z" 
+        fill="url(#flameMain)" 
+      />
+      
+      {/* Inner highlight */}
+      <path 
+        d="M50 95C50 95 62 85 65 72C67 63 64 55 62 47C61 42 57 39 56 32C56 32 53 36 50 38C47 36 44 32 44 32C43 39 39 42 38 47C36 55 33 63 35 72C38 85 50 95 50 95Z" 
+        fill="url(#flameHighlight)" 
+        opacity="0.8"
+      />
+      
+      {/* Core bright center */}
+      <path 
+        d="M50 85C50 85 58 78 60 68C61 62 59 57 58 52C57 48 55 46 54 42C54 42 52 44 50 45C48 44 46 42 46 42C45 46 43 48 42 52C41 57 39 62 40 68C42 78 50 85 50 85Z" 
+        fill="url(#flameCore)" 
+      />
+      
       <defs>
-        <linearGradient id="flameGradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#FFD166" />
-          <stop offset="40%" stopColor="#EF476F" />
+        {/* Glow gradient - outermost */}
+        <radialGradient id="flameGlow" cx="50%" cy="50%">
+          <stop offset="0%" stopColor="#FF1493" stopOpacity="0.8" />
+          <stop offset="50%" stopColor="#9B5DE5" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#6B35FF" stopOpacity="0.2" />
+        </radialGradient>
+        
+        {/* Main flame gradient */}
+        <linearGradient id="flameMain" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor="#FFD700" />
+          <stop offset="20%" stopColor="#FF1493" />
+          <stop offset="50%" stopColor="#9B5DE5" />
+          <stop offset="100%" stopColor="#6B35FF" />
+        </linearGradient>
+        
+        {/* Inner highlight gradient */}
+        <linearGradient id="flameHighlight" x1="50%" y1="0%" x2="50%" y2="100%">
+          <stop offset="0%" stopColor="#FFF4E0" />
+          <stop offset="30%" stopColor="#FFB4E6" />
+          <stop offset="70%" stopColor="#C77DFF" />
           <stop offset="100%" stopColor="#9B5DE5" />
         </linearGradient>
+        
+        {/* Core bright gradient */}
+        <radialGradient id="flameCore" cx="50%" cy="40%">
+          <stop offset="0%" stopColor="#FFFFFF" />
+          <stop offset="40%" stopColor="#FFE4F8" />
+          <stop offset="80%" stopColor="#FFB4E6" />
+          <stop offset="100%" stopColor="#FF1493" />
+        </radialGradient>
+        
+        {/* Glow filter */}
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
       </defs>
     </svg>
   );
