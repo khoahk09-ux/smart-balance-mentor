@@ -124,19 +124,6 @@ const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
         <span className="text-lg">🏆</span> {t('achievements')}
       </button>
 
-      {/* AI Chatbot */}
-      <button
-        onClick={() => onTabChange("aichat")}
-        className={cn(
-          "flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-300 bg-white/10",
-          activeTab === "aichat" 
-            ? "bg-white/35 text-[#FF6B35] font-semibold shadow-lg" 
-            : "text-[#FFB088] hover:bg-white/20 hover:text-[#FF6B35] hover:translate-x-1.5"
-        )}
-      >
-        <span className="text-lg">🤖</span> AI Trợ giảng
-      </button>
-
       {/* Cài đặt */}
       <button
         onClick={() => onTabChange("profile")}
