@@ -87,12 +87,12 @@ const StreakDisplay = ({
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ 
-            scale: isAnimating ? [1, 1.1, 1] : 1, 
+            scale: isAnimating ? [1, 1.1, 1] : [1, 1.02, 1], 
             opacity: 1,
             rotate: isAnimating ? [0, 5, -5, 0] : 0
           }}
           transition={{ 
-            scale: { duration: 0.6, repeat: isAnimating ? Infinity : 0 },
+            scale: { duration: isAnimating ? 0.6 : 2, repeat: Infinity },
             rotate: { duration: 0.4, repeat: isAnimating ? Infinity : 0 }
           }}
           className={cn(
@@ -100,8 +100,21 @@ const StreakDisplay = ({
             `bg-gradient-to-br ${getFlameColor()}`
           )}
         >
-          {/* Flame SVG */}
-          <FlameSVG className="w-10 h-10 drop-shadow-2xl" />
+          {/* Flame SVG with flicker animation */}
+          <motion.div
+            animate={{
+              scale: [1, 1.05, 0.98, 1.03, 1],
+              opacity: [1, 0.95, 1, 0.97, 1],
+              y: [0, -1, 0, -0.5, 0]
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <FlameSVG className="w-10 h-10 drop-shadow-2xl" />
+          </motion.div>
           
           {/* Streak number */}
           <motion.div 
@@ -184,31 +197,67 @@ function FlameSVG({ className = "w-12 h-12" }: { className?: string }) {
       xmlns="http://www.w3.org/2000/svg" 
       className={className}
     >
-      {/* Outer glow layer */}
-      <path 
+      {/* Outer glow layer with animation */}
+      <motion.path 
         d="M50 110C50 110 70 95 75 75C78 62 72 50 70 35C68 25 62 20 60 10C60 10 55 18 50 22C45 18 40 10 40 10C38 20 32 25 30 35C28 50 22 62 25 75C30 95 50 110 50 110Z" 
         fill="url(#flameGlow)" 
         opacity="0.6"
         filter="url(#glow)"
+        animate={{
+          scale: [1, 1.08, 1.02, 1.06, 1],
+          opacity: [0.6, 0.7, 0.55, 0.65, 0.6]
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
       />
       
-      {/* Main flame body */}
-      <path 
+      {/* Main flame body with flicker */}
+      <motion.path 
         d="M50 105C50 105 68 92 72 75C75 63 70 52 68 40C66 32 61 28 59 18C59 18 55 24 50 27C45 24 41 18 41 18C39 28 34 32 32 40C30 52 25 63 28 75C32 92 50 105 50 105Z" 
-        fill="url(#flameMain)" 
+        fill="url(#flameMain)"
+        animate={{
+          scale: [1, 1.04, 0.99, 1.02, 1],
+        }}
+        transition={{
+          duration: 1.8,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
       />
       
-      {/* Inner highlight */}
-      <path 
+      {/* Inner highlight with subtle movement */}
+      <motion.path 
         d="M50 95C50 95 62 85 65 72C67 63 64 55 62 47C61 42 57 39 56 32C56 32 53 36 50 38C47 36 44 32 44 32C43 39 39 42 38 47C36 55 33 63 35 72C38 85 50 95 50 95Z" 
         fill="url(#flameHighlight)" 
         opacity="0.8"
+        animate={{
+          scale: [1, 1.06, 1.01, 1.04, 1],
+          y: [0, -1, 0, -0.5, 0]
+        }}
+        transition={{
+          duration: 1.6,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
       />
       
-      {/* Core bright center */}
-      <path 
+      {/* Core bright center with intense flicker */}
+      <motion.path 
         d="M50 85C50 85 58 78 60 68C61 62 59 57 58 52C57 48 55 46 54 42C54 42 52 44 50 45C48 44 46 42 46 42C45 46 43 48 42 52C41 57 39 62 40 68C42 78 50 85 50 85Z" 
-        fill="url(#flameCore)" 
+        fill="url(#flameCore)"
+        animate={{
+          scale: [1, 1.1, 0.95, 1.08, 1],
+          opacity: [1, 0.9, 1, 0.95, 1],
+          y: [0, -2, 0, -1, 0]
+        }}
+        transition={{
+          duration: 1.2,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
       />
       
       <defs>
