@@ -24,6 +24,8 @@ import MistakeReview from "@/components/MistakeReview";
 import Sidebar from "@/components/Sidebar";
 import RightPanel from "@/components/RightPanel";
 import FloatingChat from "@/components/FloatingChat";
+import StreakDisplay from "@/components/StreakDisplay";
+import { useStreak } from "@/hooks/useStreak";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -31,6 +33,7 @@ const Index = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { language, setLanguage, t } = useLanguage();
+  const { currentStreak, longestStreak, canCheckIn, loading, checkIn } = useStreak();
 
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
   const username = user?.email?.split('@')[0] || 'christopher';
@@ -143,24 +146,36 @@ const Index = () => {
         <header className="sticky top-0 z-40 border-b border-border/50 bg-card/80 backdrop-blur-lg">
           <div className="px-8 py-4">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold capitalize">
-                  {activeTab === "dashboard" ? t('dashboard') : 
-                   activeTab === "scores" ? t('scores') :
-                   activeTab === "quiz" ? t('quiz') :
-                   activeTab === "mistakes" ? "Ôn tập lỗi sai" :
-                   activeTab === "schedule" ? t('schedule') :
-                   activeTab === "achievements" ? t('achievements') :
-                   t('settings')}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {new Date().toLocaleDateString('vi-VN', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                </p>
+              <div className="flex items-center gap-6">
+                <div>
+                  <h1 className="text-2xl font-bold capitalize">
+                    {activeTab === "dashboard" ? t('dashboard') : 
+                     activeTab === "scores" ? t('scores') :
+                     activeTab === "quiz" ? t('quiz') :
+                     activeTab === "mistakes" ? "Ôn tập lỗi sai" :
+                     activeTab === "schedule" ? t('schedule') :
+                     activeTab === "achievements" ? t('achievements') :
+                     t('settings')}
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date().toLocaleDateString('vi-VN', { 
+                      weekday: 'long', 
+                      year: 'numeric', 
+                      month: 'long', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                </div>
+                
+                {/* Streak Display */}
+                {!loading && (
+                  <StreakDisplay
+                    currentStreak={currentStreak}
+                    longestStreak={longestStreak}
+                    canCheckIn={canCheckIn}
+                    onCheckIn={checkIn}
+                  />
+                )}
               </div>
               
               <div className="flex items-center gap-3">
